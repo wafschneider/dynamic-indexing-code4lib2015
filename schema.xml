@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<schema name="HCL bib index" version="1.6">
+  
+  <types>
+    <fieldType name="string" class="solr.StrField" sortMissingLast="true"/>
+    <fieldType name="int" class="solr.IntField"/>
+    <fieldType name="long" class="solr.LongField"/>
+    <fieldType name="bool" class="solr.BoolField"/>
+    <fieldType name="text" class="solr.TextField" positionIncrementGap="100">
+      <analyzer type="index">
+        <tokenizer class="solr.ICUTokenizerFactory"/>
+        <filter class="solr.WordDelimiterFilterFactory" generateWordParts="1" generateNumberParts="1" catenateWords="1" catenateNumbers="1" catenateAll="0" splitOnCaseChange="1"/>
+        <filter class="solr.StopFilterFactory" ignoreCase="true" words="stopwords.txt" enablePositionIncrements="true"/>
+        <filter class="solr.ICUFoldingFilterFactory"/>
+        <filter class="solr.KeywordMarkerFilterFactory" protected="protwords.txt"/>
+        <filter class="solr.SnowballPorterFilterFactory" language="English"/>
+        <filter class="solr.RemoveDuplicatesTokenFilterFactory"/>
+      </analyzer>
+      <analyzer type="query">
+        <tokenizer class="solr.ICUTokenizerFactory"/>
+        <filter class="solr.SynonymFilterFactory" synonyms="synonyms.txt" ignoreCase="true" expand="true"/>
+        <filter class="solr.WordDelimiterFilterFactory" generateWordParts="1" generateNumberParts="1" catenateWords="0" catenateNumbers="0" catenateAll="0" splitOnCaseChange="1"/>
+        <filter class="solr.StopFilterFactory" ignoreCase="true" words="stopwords.txt" enablePositionIncrements="true"/>
+        <filter class="solr.ICUFoldingFilterFactory"/>
+        <filter class="solr.KeywordMarkerFilterFactory" protected="protwords.txt"/>
+        <filter class="solr.SnowballPorterFilterFactory" language="English"/>
+        <filter class="solr.RemoveDuplicatesTokenFilterFactory"/>
+      </analyzer>
+    </fieldType>
+    <fieldType name="textFacet" class="solr.TextField" sortMissingLast="true" omitNorms="true">
+      <analyzer>
+        <tokenizer class="solr.KeywordTokenizerFactory"/>
+        <!-- strip trailing punctuation from facets: -->
+        <filter class="solr.PatternReplaceFilterFactory" pattern="(?&lt;!\b[A-Z])[.\s]*$" replacement="" replace="first"/>
+        <filter class="solr.PatternReplaceFilterFactory" pattern=" ;$" replacement="" replace="first"/>
+      </analyzer>
+    </fieldType>
+    <!-- single token analyzed text, for sorting.  Punctuation is significant. -->
+    <fieldtype name="alphaSort" class="solr.TextField" sortMissingLast="true" omitNorms="true">
+      <analyzer>
+        <tokenizer class="solr.KeywordTokenizerFactory" />
+        <filter class="solr.LowerCaseFilterFactory" />
+        <filter class="solr.ICUFoldingFilterFactory"/>
+        <filter class="solr.TrimFilterFactory" />
+      </analyzer>
+    </fieldtype>
+  </types>
+  
+  <fields>
+    <!-- required for atomic updates -->
+    <field name="_version_" type="long" indexed="true" stored="true" multiValued="false"/>
+    
+    <!-- multi-use fields -->
+    <field name="id" type="string" indexed="true" stored="true" required="true" multiValued="false"/>
+    
+    <!-- index-only fields -->
+    <field name="defaultsearchfield" type="text" indexed="true" stored="false" multiValued="true"/>
+    <field name="allfields" type="text" indexed="true" stored="true" multiValued="true"/>
+    <field name="primary_language" type="text" indexed="true" stored="false" multiValued="false"/>
+    <field name="numbers" type="string" indexed="true" stored="true" multiValued="true"/>
+    <field name="main_entry" type="text" indexed="true" stored="true" multiValued="false"/>
+    <field name="addl_author" type="text" indexed="true" stored="true" multiValued="true"/>
+    <field name="title_proper" type="text" indexed="true" stored="true" multiValued="false"/>
+    <field name="subtitle" type="text" indexed="true" stored="true" multiValued="false"/>
+    <field name="addl_title" type="text" indexed="true" stored="true" multiValued="true"/>
+    <field name="contents" type="text" indexed="true" stored="true" multiValued="true"/>
+    <field name="series_title" type="text" indexed="true" stored="false" multiValued="true"/>
+    <field name="subject_noxrefs" type="text" indexed="true" stored="true" multiValued="true"/>
+    <field name="subject_xrefs" type="text" indexed="true" stored="true" multiValued="true"/>
+    
+    <!-- index fields for focused search -->
+    <field name="subject" type="text" indexed="true" stored="true" multiValued="true"/>
+    <field name="title" type="text" indexed="true" stored="true" multiValued="true"/>
+    <field name="author" type="text" indexed="true" stored="false" multiValued="true"/>
+    <field name="series" type="text" indexed="true" stored="true" multiValued="true"/>
+    
+    <!-- display-only fields -->
+    <field name="marc_d" type="string" indexed="false" stored="true" multiValued="false"/>
+    <field name="predominant_collection_d" type="string" indexed="false" stored="true" multiValued="false"/>
+    <field name="mc_collection_d" type="string" indexed="false" stored="true" multiValued="false"/>
+    <field name="predominant_call_number_d" type="string" indexed="false" stored="true" multiValued="false"/>
+    <field name="mc_call_number_d" type="string" indexed="false" stored="true" multiValued="false"/>
+    <field name="isbn_d" type="string" indexed="false" stored="true" multiValued="true"/>
+    <field name="isbn_norm" type="string" indexed="false" stored="true" multiValued="true"/>
+    <field name="issn_d" type="string" indexed="false" stored="true" multiValued="true"/>
+    <field name="oclc_d" type="string" indexed="false" stored="true" multiValued="false"/>
+    <field name="upc_d" type="string" indexed="false" stored="true" multiValued="true"/>
+    <field name="author_d" type="string" indexed="false" stored="true" multiValued="false"/>
+    <field name="author_by_d" type="string" indexed="false" stored="true" multiValued="false"/>
+    <field name="addl_author_d" type="string" indexed="false" stored="true" multiValued="true"/>
+    <field name="title_d" type="string" indexed="false" stored="true" multiValued="false"/>
+    <field name="var_title_d" type="string" indexed="false" stored="true" multiValued="true"/>
+    <field name="addl_title_d" type="string" indexed="false" stored="true" multiValued="true"/>
+    <field name="rel_title_d" type="string" indexed="false" stored="true" multiValued="true"/>
+    <field name="published_d" type="string" indexed="false" stored="true" multiValued="true"/>
+    <field name="edition_d" type="string" indexed="false" stored="true" multiValued="true"/>
+    <field name="physical_desc_d" type="string" indexed="false" stored="true" multiValued="true"/>
+    <field name="contents_d" type="string" indexed="false" stored="true" multiValued="true"/>
+    <field name="frequency_d" type="string" indexed="false" stored="true" multiValued="false"/>
+    <field name="summary_d" type="string" indexed="false" stored="true" multiValued="true"/>
+    <field name="cr_pub_info_d" type="string" indexed="false" stored="true" multiValued="true"/>
+    <field name="credits_d" type="string" indexed="false" stored="true" multiValued="true"/>
+    <field name="gen_note_d" type="string" indexed="false" stored="true" multiValued="true"/>
+    <field name="language_note_d" type="string" indexed="false" stored="true" multiValued="true"/>
+    <field name="subject_d" type="string" indexed="false" stored="true" multiValued="true"/>
+    <field name="genre_d" type="string" indexed="false" stored="true" multiValued="true"/>
+    <field name="series_d" type="string" indexed="false" stored="true" multiValued="true"/>
+    <field name="series_title_d" type="string" indexed="false" stored="true" multiValued="true"/>
+    <field name="pubdate_d" type="string" indexed="false" stored="true" multiValued="true"/>
+    <field name="resource_url_d" type="text" indexed="false" stored="true" multiValued="true"/>
+    <field name="syndetics_index_xml" type="string" indexed="false" stored="true" multiValued="false"/>
+    <field name="syndetics_summary_xml" type="string" indexed="false" stored="true" multiValued="false"/>
+    <field name="uniform_title_d" type="string" indexed="false" stored="true" multiValued="false"/>
+    <field name="format_icon" type="text" indexed="false" stored="true" multiValued="false"/>
+    
+    <!-- sort only fields -->
+    <field name="author_sort" type="alphaSort" indexed="true" stored="true" multiValued="false"/>
+    <field name="title_sort" type="alphaSort" indexed="true" stored="true" multiValued="false"/>
+    <field name="pubdate_sort" type="alphaSort" indexed="true" stored="true" multiValued="false"/>
+    
+    <!-- facet only fields -->
+    <field name="author_f" type="textFacet" indexed="true" stored="true" multiValued="true"/>
+    <field name="pubdate_cat_f" type="textFacet" indexed="true" stored="true" multiValued="true"/>
+    <field name="subj_topic_f" type="textFacet" indexed="true" stored="true" multiValued="true"/>
+    <field name="subj_era_f" type="textFacet" indexed="true" stored="true" multiValued="true"/>
+    <field name="subj_region_f" type="textFacet" indexed="true" stored="true" multiValued="true"/>
+    <field name="genre_f" type="textFacet" indexed="true" stored="true" multiValued="true"/>
+    <field name="series_f" type="textFacet" indexed="true" stored="true" multiValued="true"/>
+    <field name="language_f" type="textFacet" indexed="true" stored="true" multiValued="true"/>
+    <field name="format_f" type="textFacet" indexed="true" stored="true" multiValued="false"/>
+    <field name="audience_f" type="textFacet" indexed="true" stored="true" multiValued="false"/>
+    <field name="litform_f" type="textFacet" indexed="true" stored="true" multiValued="false"/>
+    <field name="availability_f" type="string" indexed="true" stored="true" multiValued="true"/>
+    <field name="availability_ref_f" type="string" indexed="true" stored="true" multiValued="true"/>
+    <field name="location_f" type="string" indexed="true" stored="true" multiValued="true"/>
+    <field name="public_f" type="string" indexed="true" stored="true" multiValued="false"/>
+    <field name="special_collection_f" type="string" indexed="true" stored="true" multiValued="true"/>
+    
+    <!-- boost fields -->
+    <field name="popularity_boost" type="int" indexed="true" stored="true" multiValued="false"/>
+    
+    <!-- item data fields -->
+    <field name="num_items" type="int" indexed="false" stored="true" multiValued="false"/>
+    <field name="num_public_items" type="int" indexed="false" stored="true" multiValued="false"/>
+    <field name="num_onorder_items" type="int" indexed="false" stored="true" multiValued="false"/>
+    <field name="num_requestable" type="int" indexed="false" stored="true" multiValued="false"/>
+    <field name="in_house_only" type="bool" indexed="false" stored="true" multiValued="false"/>
+    <field name="checked_in_libraries" type="string" indexed="false" stored="true" multiValued="true"/>
+    <field name="checked_in_limited_access_libraries" type="string" indexed="false" stored="true" multiValued="true"/>
+    <field name="requestable_item" type="string" indexed="false" stored="true" multiValued="false"/>
+    <field name="num_requests" type="int" indexed="false" stored="true" multiValued="false"/>
+    <field name="num_suspended_requests" type="int" indexed="false" stored="true" multiValued="false"/>
+    
+    <!-- subscription data fields -->
+    <field name="num_subscriptions" type="int" indexed="false" stored="true" multiValued="false"/>
+    <field name="num_public_subscriptions" type="int" indexed="false" stored="true" multiValued="false"/>
+    <field name="subscriptions_libraries" type="string" indexed="false" stored="true" multiValued="true"/>
+    <field name="num_requestable_issues" type="int" indexed="false" stored="true" multiValued="false"/>
+    
+  </fields>
+  
+  <uniqueKey>id</uniqueKey>
+  <defaultSearchField>defaultsearchfield</defaultSearchField>
+  
+  <copyField source="series_title_d" dest="series_title"/>
+  <copyField source="allfields" dest="defaultsearchfield"/>
+  <copyField source="primary_language" dest="defaultsearchfield"/>
+  <copyField source="predominant_collection_d" dest="defaultsearchfield"/>
+  <copyField source="predominant_call_number_d" dest="defaultsearchfield"/>
+  <copyField source="numbers" dest="defaultsearchfield"/>
+  <copyField source="format_f" dest="defaultsearchfield"/>
+  <copyField source="author_f" dest="author"/>
+  <copyField source="subject_noxrefs" dest="subject"/>
+  
+</schema>

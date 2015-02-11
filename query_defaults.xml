@@ -1,0 +1,30 @@
+﻿<solr>
+  <stem>search.hclib.org/discovery/titles/select</stem>
+  <port>8080</port>
+  <defaultparams>
+    <q.op>AND</q.op>
+    <defType>edismax</defType>
+    <lowercaseOperators>false</lowercaseOperators>
+    <qf>title_proper^3</qf>
+    <qf>subtitle^2</qf>
+    <qf>main_entry^3</qf>
+    <qf>addl_title^1.5</qf>
+    <qf>addl_author^1.5</qf>
+    <qf>series_title^2</qf>
+    <qf>subject_noxrefs^2</qf>
+    <qf>subject_xrefs^1.5</qf>
+    <qf>contents^1.5</qf>
+    <qf>defaultsearchfield^0.5</qf>
+    <pf>title_proper^3</pf>
+    <pf>subtitle^2</pf>
+    <pf>main_entry~3^3</pf>
+    <pf>addl_title^1.5</pf>
+    <pf>addl_author~3^1.5</pf>
+    <pf>series_title^2</pf>
+    <pf>subject_noxrefs~4^2</pf>
+    <pf>subject_xrefs~4^1.5</pf>
+    <pf>contents~3^1.5</pf>
+    <ps>2</ps>
+    <boost>log(sum(popularity_boost,10))</boost>
+  </defaultparams>
+</solr>

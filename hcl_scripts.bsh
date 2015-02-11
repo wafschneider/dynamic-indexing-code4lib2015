@@ -1,0 +1,3345 @@
+/**
+ * Script for custom solrmarc extractions
+ * Phil Feilmeyer, May 2013
+ */
+
+import org.marc4j.marc.*;
+import java.util.regex.*;
+
+import java.io.BufferedReader;
+import java.io.DataOutputStream;
+import java.io.InputStreamReader;
+
+// Publisher display
+//   support for display constants
+public Set getHCLPublishedDisplay(Record record){
+  Set result = new LinkedHashSet();
+  
+  // 260 tag
+  List fields = record.getVariableFields("260");
+  Iterator fieldsIter = fields.iterator();
+  if (fields != null) {
+    while(fieldsIter.hasNext()) {
+      DataField t260 = (DataField) fieldsIter.next();
+      char ind1 = t260.getIndicator1();
+      String t260_string = "";
+      if (ind1 == '2') {
+        t260_string = "Intervening publisher:";
+      } else if (ind1 == '3') {
+        t260_string = "Current/latest publisher:";
+      }
+      List subfields = t260.getSubfields();
+      Iterator i = subfields.iterator();
+      while (i.hasNext()) {
+        Subfield sf = (Subfield) i.next();
+        char code = sf.getCode();
+        String data = sf.getData();
+        switch(code) {
+          case 'a':
+          case 'b':
+          case 'c':
+          case 'd':
+          case 'e':
+          case 'f':
+          case 'g':
+            if (t260_string.length() == 0) {
+              t260_string = data;
+            } else {
+              t260_string += " " + data;
+            }
+            break;
+        }
+      }
+      if (t260_string.length() > 0) {
+        // remove trailing period
+        t260_string = t260_string.replaceFirst("\\.$", "");
+        result.add(t260_string);
+      }
+    }
+  }
+  
+  // 264 tag
+  List fields = record.getVariableFields("264");
+  Iterator fieldsIter = fields.iterator();
+  if (fields != null) {
+    while(fieldsIter.hasNext()) {
+      DataField t264 = (DataField) fieldsIter.next();
+      char ind1 = t264.getIndicator1();
+      char ind2 = t264.getIndicator2();
+      String t264_string = "";
+      String entity = "";
+      switch (ind2) {
+        case '0':
+          entity = "producer";
+          break;
+        case '2':
+          entity = "distributor";
+          break;
+        case '3':
+          entity = "manufacturer";
+          break;
+        default:
+          entity = "publisher";
+          break;
+      }
+      if (ind1 == '2') {
+        t264_string = "Intervening " + entity + ":";
+      } else if (ind1 == '3') {
+        t264_string = "Current/latest " + entity + ":";
+      }
+      List subfields = t264.getSubfields();
+      Iterator i = subfields.iterator();
+      while (i.hasNext()) {
+        Subfield sf = (Subfield) i.next();
+        char code = sf.getCode();
+        String data = sf.getData();
+        switch(code) {
+          case 'a':
+          case 'b':
+          case 'c':
+            if (t264_string.length() == 0) {
+              t264_string = data;
+            } else {
+              t264_string += " " + data;
+            }
+            break;
+        }
+      }
+      if (t264_string.length() > 0) {
+        // remove trailing period
+        t264_string = t264_string.replaceFirst("\\.$", "");
+        result.add(t264_string);
+      }
+    }
+  }
+  
+  return result;
+ 
+}
+// end of Publisher display
+
+// Publisher (no place) display
+//   support for display constants
+public Set getHCLPublishedNoPlaceDisplay(Record record){
+  Set result = new LinkedHashSet();
+  
+  // 260 tag
+  List fields = record.getVariableFields("260");
+  Iterator fieldsIter = fields.iterator();
+  if (fields != null) {
+    while(fieldsIter.hasNext()) {
+      DataField t260 = (DataField) fieldsIter.next();
+      char ind1 = t260.getIndicator1();
+      String t260_string = "";
+      if (ind1 == '2') {
+        t260_string = "Intervening publisher:";
+      } else if (ind1 == '3') {
+        t260_string = "Current/latest publisher:";
+      }
+      List subfields = t260.getSubfields();
+      Iterator i = subfields.iterator();
+      while (i.hasNext()) {
+        Subfield sf = (Subfield) i.next();
+        char code = sf.getCode();
+        String data = sf.getData();
+        switch(code) {
+          case 'b':
+          case 'c':
+          case 'd':
+          case 'e':
+          case 'f':
+          case 'g':
+            if (t260_string.length() == 0) {
+              t260_string = data;
+            } else {
+              t260_string += " " + data;
+            }
+            break;
+        }
+      }
+      if (t260_string.length() > 0) {
+        // remove trailing period
+        t260_string = t260_string.replaceFirst("\\.$", "");
+        result.add(t260_string);
+      }
+    }
+  }
+  
+  // 264 tag
+  List fields = record.getVariableFields("264");
+  Iterator fieldsIter = fields.iterator();
+  if (fields != null) {
+    while(fieldsIter.hasNext()) {
+      DataField t264 = (DataField) fieldsIter.next();
+      char ind1 = t264.getIndicator1();
+      char ind2 = t264.getIndicator2();
+      String t264_string = "";
+      String entity = "";
+      switch (ind2) {
+        case '0':
+          entity = "producer";
+          break;
+        case '2':
+          entity = "distributor";
+          break;
+        case '3':
+          entity = "manufacturer";
+          break;
+        default:
+          entity = "publisher";
+          break;
+      }
+      if (ind1 == '2') {
+        t264_string = "Intervening " + entity + ":";
+      } else if (ind1 == '3') {
+        t264_string = "Current/latest " + entity + ":";
+      }
+      List subfields = t264.getSubfields();
+      Iterator i = subfields.iterator();
+      while (i.hasNext()) {
+        Subfield sf = (Subfield) i.next();
+        char code = sf.getCode();
+        String data = sf.getData();
+        switch(code) {
+          case 'b':
+          case 'c':
+            if (t264_string.length() == 0) {
+              t264_string = data;
+            } else {
+              t264_string += " " + data;
+            }
+            break;
+        }
+      }
+      if (t264_string.length() > 0) {
+        result.add(t264_string);
+        // remove trailing period
+        t264_string = t264_string.replaceFirst("\\.$", "");
+      }
+    }
+  }
+  
+  return result;
+ 
+}
+// end of Publisher (no place) display
+
+// Publication date
+//   Will only return data when there is a 4 digit
+//   year in 008/date1 and the record is not a serial
+public String getHCLPubDate(Record record){
+  String result = null;
+  
+  // Grab the necessary data from the leader and 008
+  String leader = record.getLeader().toString();
+  char ldr07 = leader.charAt(7);
+  
+  char fixed06 = ' ';
+  String date1 = null;
+  ControlField fixed = (ControlField) record.getVariableField("008");
+  if (fixed != null) {
+    fixed06 = fixed.getData().length() > 6 ? fixed.getData().charAt(6) : ' ';
+    date1 = fixed.getData().length() > 11 ? fixed.getData().substring(7, 11) : " ";
+  }
+  
+  if (ldr07 != 's') {
+    // examine the code at 008/06
+    switch (fixed06) {
+      case ' ':
+      case 'e':
+      case 'i':
+      case 'k':
+      case 'm':
+      case 'p':
+      case 'r':
+      case 's':
+      case 't':
+        // see if date1 is four digits
+        if ((date1 != null) && isValidStringNumber(date1)) {
+          result = date1;
+        }
+      break;
+    }
+  }
+  return result;
+}
+
+// Publication date category
+//   Will only return data when there is a 4 digit
+//   year in 008/date1 and the record is not a serial
+public Set getHCLPubDateCategory(Record record){
+  Set result = new LinkedHashSet();
+  
+  // Grab the necessary data from the leader and 008
+  String leader = record.getLeader().toString();
+  char ldr07 = leader.charAt(7);
+  char fixed06 = ' ';
+  String date1 = null;
+  ControlField fixed = (ControlField) record.getVariableField("008");
+  if (fixed != null) {
+    fixed06 = fixed.getData().length() > 6 ? fixed.getData().charAt(6) : ' ';
+    date1 = fixed.getData().length() > 11 ? fixed.getData().substring(7, 11) : " ";
+  }
+  
+  if (ldr07 != 's') {
+    // examine the code at 008/06
+    switch (fixed06) {
+      case 'e':
+      case 'i':
+      case 'k':
+      case 'm':
+      case 'p':
+      case 'r':
+      case 's':
+      case 't':
+        // see if date1 is four digits
+        if (isValidStringNumber(date1)) {
+          // convert date to a time period
+          int pub_date = Integer.parseInt(date1);
+          int current_date = Calendar.getInstance().get(Calendar.YEAR);
+          
+          if (pub_date >= current_date - 1) {
+            result.add("Current year");
+          }
+          if (pub_date >= current_date - 3) {
+            result.add("Last 3 years");
+          }
+          if (pub_date >= current_date - 5) {
+            result.add("Last 5 years");
+          }
+          if (pub_date >= current_date - 10) {
+            result.add("Last 10 years");
+          }
+          if (pub_date < current_date - 10) {
+            result.add("Over 10 years");
+          }
+        }
+      break;
+    }
+  }
+  return result;
+}
+
+private boolean isValidStringNumber(String stringNumber) {
+  if(stringNumber.isEmpty()) {
+    return false;
+  }
+  char [] charNumber = stringNumber.toCharArray();
+  for(int i =0 ; i<charNumber.length ;i++) {
+    if(!Character.isDigit(charNumber[i]) || charNumber[i].equals(" ")) {
+      return false;
+    }
+  }
+  return true;
+}
+// end of Publication date
+
+
+// Contents note display
+//   support for display constants
+public Set getHCLContentsDisplay(Record record){
+  Set result = new LinkedHashSet();
+  
+  // 505 tag
+  List fields = record.getVariableFields("505");
+  Iterator fieldsIter = fields.iterator();
+  if (fields != null) {
+    while(fieldsIter.hasNext()) {
+      DataField t505 = (DataField) fieldsIter.next();
+      char ind1 = t505.getIndicator1();
+      String t505_string = "";
+      if (ind1 == '1') {
+        t505_string = "Incomplete contents:";
+      } else if (ind1 == '2') {
+        t505_string = "Partial contents:";
+      }
+      List subfields = t505.getSubfields();
+      Iterator i = subfields.iterator();
+      while (i.hasNext()) {
+        Subfield sf = (Subfield) i.next();
+        char code = sf.getCode();
+        String data = sf.getData();
+        switch(code) {
+          case 'a':
+          case 'g':
+          case 'r':
+          case 't':
+            if (t505_string.length() == 0) {
+              t505_string = data;
+            } else {
+              t505_string += " " + data;
+            }
+            break;
+        }
+      }
+      if (t505_string.length() > 0) {
+        result.add(t505_string);
+      }
+    }
+  }
+  
+  return result;
+ 
+}
+// end of Contents note display
+
+
+// Subject heading display
+//   generates "classic" SH display with double dashes between subdivisions
+//   only returns if it's a bone-fide LC heading
+public Set getHCLSubjectDisplay(Record record){
+  Set result = new LinkedHashSet();
+  
+  // 600 tag
+  List fields = record.getVariableFields("600");
+  Iterator fieldsIter = fields.iterator();
+  if (fields != null) {
+    while(fieldsIter.hasNext()) {
+      DataField t600 = (DataField) fieldsIter.next();
+      char ind2 = t600.getIndicator2();
+      // only process LC subject headings
+      if (ind2 == '0') {
+        String t600_string = "";
+        List subfields = t600.getSubfields();
+        Iterator i = subfields.iterator();
+        while (i.hasNext()) {
+          Subfield sf = (Subfield) i.next();
+          char code = sf.getCode();
+          String data = sf.getData();
+          switch(code) {
+            case 'a':
+            case 'b':
+            case 'c':
+            case 'd':
+            case 'f':
+            case 'k':
+            case 'l':
+            case 'm':
+            case 'n':
+            case 'o':
+            case 'p':
+            case 'q':
+            case 'r':
+            case 's':
+            case 't':
+            case 'u':
+              if (t600_string.length() == 0) {
+                t600_string = data;
+              } else {
+                t600_string += " " + data;
+              }
+              break;
+            case 'v':
+            case 'x':
+            case 'y':
+            case 'z':
+              if (t600_string.length() == 0) {
+                t600_string = data;
+              } else {
+                t600_string += " -- " + data;
+              }
+              break;
+          }
+        }
+        if (t600_string.length() > 0) {
+          result.add(t600_string);
+        }
+      }
+    }
+  }
+  
+  // 610 tag
+  List fields = record.getVariableFields("610");
+  Iterator fieldsIter = fields.iterator();
+  if (fields != null) {
+    while(fieldsIter.hasNext()) {
+      DataField t610 = (DataField) fieldsIter.next();
+      char ind2 = t610.getIndicator2();
+      // only process LC subject headings
+      if (ind2 == '0') {
+        String t610_string = "";
+        List subfields = t610.getSubfields();
+        Iterator i = subfields.iterator();
+        while (i.hasNext()) {
+          Subfield sf = (Subfield) i.next();
+          char code = sf.getCode();
+          String data = sf.getData();
+          switch(code) {
+            case 'a':
+            case 'b':
+            case 'c':
+            case 'd':
+            case 'f':
+            case 'g':
+            case 'k':
+            case 'l':
+            case 'm':
+            case 'n':
+            case 'o':
+            case 'p':
+            case 'r':
+            case 's':
+            case 't':
+            case 'u':
+              if (t610_string.length() == 0) {
+                t610_string = data;
+              } else {
+                t610_string += " " + data;
+              }
+              break;
+            case 'v':
+            case 'x':
+            case 'y':
+            case 'z':
+              t610_string += " -- " + data;
+              break;
+          }
+        }
+        if (t610_string.length() > 0) {
+          result.add(t610_string);
+        }
+      }
+    }
+  }
+  
+  // 611 tag
+  List fields = record.getVariableFields("611");
+  Iterator fieldsIter = fields.iterator();
+  if (fields != null) {
+    while(fieldsIter.hasNext()) {
+      DataField t611 = (DataField) fieldsIter.next();
+      char ind2 = t611.getIndicator2();
+      // only process LC subject headings
+      if (ind2 == '0') {
+        String t611_string = "";
+        List subfields = t611.getSubfields();
+        Iterator i = subfields.iterator();
+        while (i.hasNext()) {
+          Subfield sf = (Subfield) i.next();
+          char code = sf.getCode();
+          String data = sf.getData();
+          switch(code) {
+            case 'a':
+            case 'c':
+            case 'd':
+            case 'e':
+            case 'f':
+            case 'g':
+            case 'k':
+            case 'l':
+            case 'n':
+            case 'p':
+            case 'q':
+            case 's':
+            case 't':
+            case 'u':
+              if (t611_string.length() == 0) {
+                t611_string = data;
+              } else {
+                t611_string += " " + data;
+              }
+              break;
+            case 'v':
+            case 'x':
+            case 'y':
+            case 'z':
+              t611_string += " -- " + data;
+              break;
+          }
+        }
+        if (t611_string.length() > 0) {
+          result.add(t611_string);
+        }
+      }
+    }
+  }
+  
+  // 630 tag
+  List fields = record.getVariableFields("630");
+  Iterator fieldsIter = fields.iterator();
+  if (fields != null) {
+    while(fieldsIter.hasNext()) {
+      DataField t630 = (DataField) fieldsIter.next();
+      char ind2 = t630.getIndicator2();
+      // only process LC subject headings
+      if (ind2 == '0') {
+        String t630_string = "";
+        List subfields = t630.getSubfields();
+        Iterator i = subfields.iterator();
+        while (i.hasNext()) {
+          Subfield sf = (Subfield) i.next();
+          char code = sf.getCode();
+          String data = sf.getData();
+          switch(code) {
+            case 'a':
+            case 'd':
+            case 'f':
+            case 'g':
+            case 'k':
+            case 'l':
+            case 'm':
+            case 'n':
+            case 'o':
+            case 'p':
+            case 'r':
+            case 's':
+            case 't':
+              if (t630_string.length() == 0) {
+                t630_string = data;
+              } else {
+                t630_string += " " + data;
+              }
+              break;
+            case 'v':
+            case 'x':
+            case 'y':
+            case 'z':
+              t630_string += " -- " + data;
+              break;
+          }
+        }
+        if (t630_string.length() > 0) {
+          result.add(t630_string);
+        }
+      }
+    }
+  }
+  
+  // 650 tag
+  List fields = record.getVariableFields("650");
+  Iterator fieldsIter = fields.iterator();
+  if (fields != null) {
+    while(fieldsIter.hasNext()) {
+      DataField t650 = (DataField) fieldsIter.next();
+      char ind2 = t650.getIndicator2();
+      // only process LC subject headings
+      if (ind2 == '0') {
+        String t650_string = "";
+        List subfields = t650.getSubfields();
+        Iterator i = subfields.iterator();
+        while (i.hasNext()) {
+          Subfield sf = (Subfield) i.next();
+          char code = sf.getCode();
+          String data = sf.getData();
+          switch(code) {
+            case 'a':
+            case 'b':
+            case 'c':
+            case 'd':
+              if (t650_string.length() == 0) {
+                t650_string = data;
+              } else {
+                t650_string += " " + data;
+              }
+              break;
+            case 'v':
+            case 'x':
+            case 'y':
+            case 'z':
+              t650_string += " -- " + data;
+              break;
+          }
+        }
+        if (t650_string.length() > 0) {
+          result.add(t650_string);
+        }
+      }
+    }
+  }
+  
+  // 651 tag
+  List fields = record.getVariableFields("651");
+  Iterator fieldsIter = fields.iterator();
+  if (fields != null) {
+    while(fieldsIter.hasNext()) {
+      DataField t651 = (DataField) fieldsIter.next();
+      char ind2 = t651.getIndicator2();
+      // only process LC subject headings
+      if (ind2 == '0') {
+        String t651_string = "";
+        List subfields = t651.getSubfields();
+        Iterator i = subfields.iterator();
+        while (i.hasNext()) {
+          Subfield sf = (Subfield) i.next();
+          char code = sf.getCode();
+          String data = sf.getData();
+          switch(code) {
+            case 'a':
+              if (t651_string.length() == 0) {
+                t651_string = data;
+              } else {
+                t651_string += " " + data;
+              }
+              break;
+            case 'v':
+            case 'x':
+            case 'y':
+            case 'z':
+              t651_string += " -- " + data;
+              break;
+          }
+        }
+        if (t651_string.length() > 0) {
+          result.add(t651_string);
+        }
+      }
+    }
+  }
+  
+  return result;
+ 
+}
+// end of Subject heading display
+
+
+// Genre heading display
+//   supports suppression by indicator
+//   generates classic SH display with -- separating subdivisions
+public Set getHCLGenreDisplay(Record record){
+  Set result = new LinkedHashSet();
+  
+  // 655 tag
+  List fields = record.getVariableFields("655");
+  Iterator fieldsIter = fields.iterator();
+  if (fields != null) {
+    while(fieldsIter.hasNext()) {
+      DataField t655 = (DataField) fieldsIter.next();
+      char ind2 = t655.getIndicator2();
+      // only process LC subject headings
+      if ((ind2 == '0') || (ind2 == '4') || (ind2 == '7')) {
+        String t655_string = "";
+        List subfields = t655.getSubfields();
+        Iterator i = subfields.iterator();
+        while (i.hasNext()) {
+          Subfield sf = (Subfield) i.next();
+          char code = sf.getCode();
+          String data = sf.getData();
+          switch(code) {
+            case 'a':
+              if (t655_string.length() == 0) {
+                t655_string = data;
+              } else {
+                t655_string += " " + data;
+              }
+              break;
+            case 'v':
+            case 'x':
+            case 'y':
+            case 'z':
+              if (t655_string.length() == 0) {
+                t655_string = data;
+              } else {
+                t655_string += " -- " + data;
+              }
+              break;
+          }
+        }
+        if (t655_string.length() > 0) {
+          result.add(t655_string);
+        }
+      }
+    }
+  }
+  
+  return result;
+ 
+}
+// end of Genre heading display
+
+
+// Subject heading search
+//   only returns bone-fide LC heading with select subfields for indexing
+public Set getHCLSubjectSearch(Record record){
+  Set result = new LinkedHashSet();
+  
+  // 600 tag
+  List fields = record.getVariableFields("600");
+  Iterator fieldsIter = fields.iterator();
+  if (fields != null) {
+    while(fieldsIter.hasNext()) {
+      DataField t600 = (DataField) fieldsIter.next();
+      char ind2 = t600.getIndicator2();
+      // only process LC subject headings
+      if (ind2 == '0') {
+        String t600_string = "";
+        List subfields = t600.getSubfields();
+        Iterator i = subfields.iterator();
+        while (i.hasNext()) {
+          Subfield sf = (Subfield) i.next();
+          char code = sf.getCode();
+          String data = sf.getData();
+          switch(code) {
+            case 'a':
+            case 'b':
+            case 'c':
+            case 'd':
+            case 'f':
+            case 'k':
+            case 'l':
+            case 'm':
+            case 'n':
+            case 'o':
+            case 'p':
+            case 'q':
+            case 'r':
+            case 's':
+            case 't':
+            case 'u':
+            case 'v':
+            case 'x':
+            case 'y':
+            case 'z':
+              if (t600_string.length() == 0) {
+                t600_string = data;
+              } else {
+                t600_string += " " + data;
+              }
+              break;
+          }
+        }
+        if (t600_string.length() > 0) {
+          result.add(t600_string);
+        }
+      }
+    }
+  }
+  
+  // 610 tag
+  List fields = record.getVariableFields("610");
+  Iterator fieldsIter = fields.iterator();
+  if (fields != null) {
+    while(fieldsIter.hasNext()) {
+      DataField t610 = (DataField) fieldsIter.next();
+      char ind2 = t610.getIndicator2();
+      // only process LC subject headings
+      if (ind2 == '0') {
+        String t610_string = "";
+        List subfields = t610.getSubfields();
+        Iterator i = subfields.iterator();
+        while (i.hasNext()) {
+          Subfield sf = (Subfield) i.next();
+          char code = sf.getCode();
+          String data = sf.getData();
+          switch(code) {
+            case 'a':
+            case 'b':
+            case 'c':
+            case 'd':
+            case 'f':
+            case 'g':
+            case 'k':
+            case 'l':
+            case 'm':
+            case 'n':
+            case 'o':
+            case 'p':
+            case 'r':
+            case 's':
+            case 't':
+            case 'u':
+            case 'v':
+            case 'x':
+            case 'y':
+            case 'z':
+              if (t610_string.length() == 0) {
+                t610_string = data;
+              } else {
+                t610_string += " " + data;
+              }
+              break;
+          }
+        }
+        if (t610_string.length() > 0) {
+          result.add(t610_string);
+        }
+      }
+    }
+  }
+  
+  // 611 tag
+  List fields = record.getVariableFields("611");
+  Iterator fieldsIter = fields.iterator();
+  if (fields != null) {
+    while(fieldsIter.hasNext()) {
+      DataField t611 = (DataField) fieldsIter.next();
+      char ind2 = t611.getIndicator2();
+      // only process LC subject headings
+      if (ind2 == '0') {
+        String t611_string = "";
+        List subfields = t611.getSubfields();
+        Iterator i = subfields.iterator();
+        while (i.hasNext()) {
+          Subfield sf = (Subfield) i.next();
+          char code = sf.getCode();
+          String data = sf.getData();
+          switch(code) {
+            case 'a':
+            case 'c':
+            case 'd':
+            case 'e':
+            case 'f':
+            case 'g':
+            case 'k':
+            case 'l':
+            case 'n':
+            case 'p':
+            case 'q':
+            case 's':
+            case 't':
+            case 'u':
+            case 'v':
+            case 'x':
+            case 'y':
+            case 'z':
+              if (t611_string.length() == 0) {
+                t611_string = data;
+              } else {
+                t611_string += " " + data;
+              }
+              break;
+          }
+        }
+        if (t611_string.length() > 0) {
+          result.add(t611_string);
+        }
+      }
+    }
+  }
+  
+  // 630 tag
+  List fields = record.getVariableFields("630");
+  Iterator fieldsIter = fields.iterator();
+  if (fields != null) {
+    while(fieldsIter.hasNext()) {
+      DataField t630 = (DataField) fieldsIter.next();
+      char ind2 = t630.getIndicator2();
+      // only process LC subject headings
+      if (ind2 == '0') {
+        String t630_string = "";
+        List subfields = t630.getSubfields();
+        Iterator i = subfields.iterator();
+        while (i.hasNext()) {
+          Subfield sf = (Subfield) i.next();
+          char code = sf.getCode();
+          String data = sf.getData();
+          switch(code) {
+            case 'a':
+            case 'd':
+            case 'f':
+            case 'g':
+            case 'k':
+            case 'l':
+            case 'm':
+            case 'n':
+            case 'o':
+            case 'p':
+            case 'r':
+            case 's':
+            case 't':
+            case 'v':
+            case 'x':
+            case 'y':
+            case 'z':
+              if (t630_string.length() == 0) {
+                t630_string = data;
+              } else {
+                t630_string += " " + data;
+              }
+              break;
+          }
+        }
+        if (t630_string.length() > 0) {
+          result.add(t630_string);
+        }
+      }
+    }
+  }
+  
+  // 650 tag
+  List fields = record.getVariableFields("650");
+  Iterator fieldsIter = fields.iterator();
+  if (fields != null) {
+    while(fieldsIter.hasNext()) {
+      DataField t650 = (DataField) fieldsIter.next();
+      char ind2 = t650.getIndicator2();
+      // only process LC subject headings
+      if (ind2 == '0') {
+        String t650_string = "";
+        List subfields = t650.getSubfields();
+        Iterator i = subfields.iterator();
+        while (i.hasNext()) {
+          Subfield sf = (Subfield) i.next();
+          char code = sf.getCode();
+          String data = sf.getData();
+          switch(code) {
+            case 'a':
+            case 'b':
+            case 'c':
+            case 'd':
+            case 'v':
+            case 'x':
+            case 'y':
+            case 'z':
+              if (t650_string.length() == 0) {
+                t650_string = data;
+              } else {
+                t650_string += " " + data;
+              }
+              break;
+          }
+        }
+        if (t650_string.length() > 0) {
+          result.add(t650_string);
+        }
+      }
+    }
+  }
+  
+  // 651 tag
+  List fields = record.getVariableFields("651");
+  Iterator fieldsIter = fields.iterator();
+  if (fields != null) {
+    while(fieldsIter.hasNext()) {
+      DataField t651 = (DataField) fieldsIter.next();
+      char ind2 = t651.getIndicator2();
+      // only process LC subject headings
+      if (ind2 == '0') {
+        String t651_string = "";
+        List subfields = t651.getSubfields();
+        Iterator i = subfields.iterator();
+        while (i.hasNext()) {
+          Subfield sf = (Subfield) i.next();
+          char code = sf.getCode();
+          String data = sf.getData();
+          switch(code) {
+            case 'a':
+            case 'v':
+            case 'x':
+            case 'y':
+            case 'z':
+              if (t651_string.length() == 0) {
+                t651_string = data;
+              } else {
+                t651_string += " " + data;
+              }
+              break;
+          }
+        }
+        if (t651_string.length() > 0) {
+          result.add(t651_string);
+        }
+      }
+    }
+  }
+  
+  // 655 tag
+  List fields = record.getVariableFields("655");
+  Iterator fieldsIter = fields.iterator();
+  if (fields != null) {
+    while(fieldsIter.hasNext()) {
+      DataField t655 = (DataField) fieldsIter.next();
+      char ind2 = t655.getIndicator2();
+      // only process LC subject headings
+      if ((ind2 == '0') || (ind2 == '4') || (ind2 == '7')) {
+        String t655_string = "";
+        List subfields = t655.getSubfields();
+        Iterator i = subfields.iterator();
+        while (i.hasNext()) {
+          Subfield sf = (Subfield) i.next();
+          char code = sf.getCode();
+          String data = sf.getData();
+          switch(code) {
+            case 'a':
+            case 'v':
+            case 'x':
+            case 'y':
+            case 'z':
+              if (t655_string.length() == 0) {
+                t655_string = data;
+              } else {
+                t655_string += " " + data;
+              }
+              break;
+          }
+        }
+        if (t655_string.length() > 0) {
+          result.add(t655_string);
+        }
+      }
+    }
+  }
+  
+  return result;
+ 
+}
+// end of Subject heading search
+
+
+// Varying form of title display
+//    supports display constants
+public Set getHCLVarTitleDisplay(Record record){
+  Set result = new LinkedHashSet();
+  
+  // 246 tag
+  List fields = record.getVariableFields("246");
+  Iterator fieldsIter = fields.iterator();
+  if (fields != null) {
+    while(fieldsIter.hasNext()) {
+      DataField t246 = (DataField) fieldsIter.next();
+      char ind1 = t246.getIndicator1();
+      char ind2 = t246.getIndicator2();
+      String t246_string = "";
+      if ((ind1 == '0') || (ind1 == '1')) {
+        switch(ind2) {
+          case '0':
+            t246_string = "Portion of title:";
+            break;
+          case '1':
+            t246_string = "Parallel title:";
+            break;
+          case '2':
+            t246_string = "Distinctive title:";
+            break;
+          case '3':
+            t246_string = "Other title:";
+            break;
+          case '4':
+            t246_string = "Cover title:";
+            break;
+          case '5':
+            t246_string = "Added title page title:";
+            break;
+          case '6':
+            t246_string = "Caption title:";
+            break;
+          case '7':
+            t246_string = "Running title:";
+            break;
+          case '8':
+            t246_string = "Spine title:";
+            break;
+        }
+        List subfields = t246.getSubfields();
+        Iterator i = subfields.iterator();
+        while (i.hasNext()) {
+          Subfield sf = (Subfield) i.next();
+          char code = sf.getCode();
+          String data = sf.getData();
+          switch(code) {
+            case 'a':
+            case 'b':
+            case 'f':
+            case 'g':
+            case 'n':
+            case 'p':
+              if (t246_string.length() == 0) {
+                t246_string = data;
+              } else {
+                t246_string += " " + data;
+              }
+              break;
+          }
+        }
+        if (t246_string.length() > 0) {
+          result.add(t246_string);
+        }
+      }
+    }
+  }
+  
+  // 242 tag
+  List fields = record.getVariableFields("242");
+  Iterator fieldsIter = fields.iterator();
+  if (fields != null) {
+    while(fieldsIter.hasNext()) {
+      DataField t242 = (DataField) fieldsIter.next();
+      char ind1 = t242.getIndicator1();
+      String t242_string = "";
+      String entity = "";
+      if (ind1 == '1') {
+        List subfields = t242.getSubfields();
+        Iterator i = subfields.iterator();
+        while (i.hasNext()) {
+          Subfield sf = (Subfield) i.next();
+          char code = sf.getCode();
+          String data = sf.getData();
+          switch(code) {
+            case 'a':
+            case 'b':
+            case 'c':
+            case 'n':
+            case 'p':
+              if (t242_string.length() == 0) {
+                t242_string = data;
+              } else {
+                t242_string += " " + data;
+              }
+              break;
+          }
+        }
+        if (t242_string.length() > 0) {
+          result.add(t242_string);
+        }
+      }
+    }
+  }
+    
+  return result;
+ 
+}
+// end of Varying form of title display
+
+
+// General note display
+//   supports display constants and selective subfield usage
+public Set getHCLGeneralNoteDisplay(Record record){
+  Set result = new LinkedHashSet();
+  List fields = record.getDataFields();
+  Iterator fieldsIter = fields.iterator();
+  if (fields != null) {
+    while(fieldsIter.hasNext()) {
+      DataField field = (DataField) fieldsIter.next();
+      String tag = field.getTag();
+      char ind1 = field.getIndicator1();
+      if (tag.equals("500") || tag.equals("502") || tag.equals("504") || tag.equals("518") || tag.equals("522") || tag.equals("540") || tag.equals("547") || tag.equals("580") || tag.equals("538")) {
+        String t5xx_string = "";
+        List subfields = field.getSubfields();
+        Iterator i = subfields.iterator();
+        while (i.hasNext()) {
+          Subfield sf = (Subfield) i.next();
+          char code = sf.getCode();
+          String data = sf.getData();
+          switch(code) {
+            case 'a':
+            case 'b':
+              if (t5xx_string.length() == 0) {
+                t5xx_string = data;
+              } else {
+                t5xx_string += " " + data;
+              }
+              break;
+          }
+        }
+        if (t5xx_string.length() > 0) {
+          result.add(t5xx_string);
+        }
+      } else if (tag.equals("533")) {
+        String t533_string = "";
+        List subfields = field.getSubfields();
+        Iterator i = subfields.iterator();
+        while (i.hasNext()) {
+          Subfield sf = (Subfield) i.next();
+          char code = sf.getCode();
+          String data = sf.getData();
+          switch(code) {
+            case 'a':
+            case 'b':
+            case 'c':
+            case 'd':
+            case 'e':
+            case 'f':
+            case 'm':
+              if (t533_string.length() == 0) {
+                t533_string = data;
+              } else {
+                t533_string += " " + data;
+              }
+              break;
+          }
+        }
+        if (t533_string.length() > 0) {
+          result.add(t533_string);
+        }
+      } else if (tag.equals("555")) {
+        String t555_string = "";
+        switch(ind1) {
+          case ' ':
+            $555_string = "Indexes:";
+            break;
+          case '1':
+            $555_string = "Finding aids:";
+            break;
+        }
+        List subfields = field.getSubfields();
+        Iterator i = subfields.iterator();
+        while (i.hasNext()) {
+          Subfield sf = (Subfield) i.next();
+          char code = sf.getCode();
+          String data = sf.getData();
+          switch(code) {
+            case 'a':
+            case 'b':
+            case 'c':
+            case 'd':
+              if (t555_string.length() == 0) {
+                t555_string = data;
+              } else {
+                t555_string += " " + data;
+              }
+              break;
+          }
+        }
+        if (t555_string.length() > 0) {
+          result.add(t555_string);
+        }
+      } else if (tag.equals("556")) {
+        String t556_string = "";
+        switch(ind1) {
+          case ' ':
+            $556_string = "Documentation:";
+            break;
+        }
+        List subfields = field.getSubfields();
+        Iterator i = subfields.iterator();
+        while (i.hasNext()) {
+          Subfield sf = (Subfield) i.next();
+          char code = sf.getCode();
+          String data = sf.getData();
+          switch(code) {
+            case 'a':
+            case 'z':
+              if (t556_string.length() == 0) {
+                t556_string = data;
+              } else {
+                t556_string += " " + data;
+              }
+              break;
+          }
+        }
+        if (t556_string.length() > 0) {
+          result.add(t556_string);
+        }
+      } else if (tag.equals("586")) {
+        String t586_string = "";
+        switch(ind1) {
+          case ' ':
+            $586_string = "Awards:";
+            break;
+        }
+        List subfields = field.getSubfields();
+        Iterator i = subfields.iterator();
+        while (i.hasNext()) {
+          Subfield sf = (Subfield) i.next();
+          char code = sf.getCode();
+          String data = sf.getData();
+          switch(code) {
+            case 'a':
+              if (t586_string.length() == 0) {
+                t586_string = data;
+              } else {
+                t586_string += " " + data;
+              }
+              break;
+          }
+        }
+        if (t586_string.length() > 0) {
+          result.add(t586_string);
+        }
+      }
+    }
+  }
+  
+  return result;
+ 
+}
+// end of General note display
+
+
+// Title display
+//   recreates the get_nice_title from the old XSLAPI scripts
+/*
+public Set getHCLTitleDisplay(Record record){
+  Set result = new LinkedHashSet();
+  DataField field = (DataField) record.getVariableField("245");
+  if (field != null) {
+    String title_string = "";
+    List subfields = field.getSubfields();
+    Iterator i = subfields.iterator();
+    while (i.hasNext()) {
+      Subfield sf = (Subfield) i.next();
+      char code = sf.getCode();
+      String data = sf.getData();
+      if ((code == 'a') || (code == 'b') || (code == 'n') || (code == 'p')) {
+        if (title_string.length() == 0) {
+          title_string = data;
+        } else {
+          title_string += " " + data;
+        }
+      } else if (code == 'h') {
+        Pattern p = Pattern.compile(" (:|/|=|;)$");
+        Matcher m = p.matcher(data);
+        if (m.find()) {
+          title_string += " " + m.group(1);
+        }
+      } else if (code == 'c') {
+        String statement_of_responsibility = "";
+        if (data.length() <= 50) {
+          statement_of_responsibility = data;
+        } else {
+          String[] words = data.split("[ ]+");
+          for(String next_word : words) {
+            if (statement_of_responsibility.length() + next_word.length() >= 50) {
+              statement_of_responsibility += "...";
+              break;
+            } else {
+              if (statement_of_responsibility.length() == 0) {
+                statement_of_responsibility = next_word;
+              } else {
+                statement_of_responsibility += " " + next_word;
+              }
+            }
+          }
+        }
+        title_string += " " + statement_of_responsibility;
+      }
+    }
+    if (title_string.length() > 0) {
+      result.add(title_string);
+      return result;
+    }
+  }
+  return result;
+}
+*/
+
+
+// Title no subfield c display
+//   recreates the get_nice_title_no_c from the old XSLAPI scripts
+public String getHCLTitleDisplay(Record record){
+  String result = null;
+  DataField field = (DataField) record.getVariableField("245");
+  if (field != null) {
+    List subfields = field.getSubfields();
+    Iterator i = subfields.iterator();
+    while (i.hasNext()) {
+      Subfield sf = (Subfield) i.next();
+      char code = sf.getCode();
+      String data = sf.getData();
+      if ((code == 'a') || (code == 'b') || (code == 'n') || (code == 'p')) {
+        if (result == null) {
+          result = data;
+        } else {
+          result += " " + data;
+        }
+      } else if (code == 'h') {
+        Pattern p = Pattern.compile(" (:|/|=|;)$");
+        Matcher m = p.matcher(data);
+        if (m.find()) {
+          result += " " + m.group(1);
+        }
+      }
+    }
+    //remove ending slash
+    result = result.replaceFirst(" /$", "");
+    
+  }
+  if (result == null) {
+    result = "[no title]";
+  }
+  return result;
+}
+
+// Related Title Display
+//   supports selective subfields
+//   supports display constants
+public Set getHCLRelatedTitleDisplay(Record record) {
+  Set result = new LinkedHashSet();
+  
+  // 247 tag
+  List fields = record.getVariableFields("247");
+  Iterator fieldsIter = fields.iterator();
+  if (fields != null) {
+    while(fieldsIter.hasNext()) {
+      DataField t247 = (DataField) fieldsIter.next();
+      char ind2 = t247.getIndicator2();
+      String t247_string = "";
+      if (ind2 == '0') {
+        t247_string = "Former title:";
+        List subfields = t247.getSubfields();
+        Iterator i = subfields.iterator();
+        while (i.hasNext()) {
+          Subfield sf = (Subfield) i.next();
+          char code = sf.getCode();
+          String data = sf.getData();
+          switch(code) {
+            case 'a':
+            case 'b':
+            case 'f':
+            case 'g':
+            case 'n':
+            case 'p':
+              if (t247_string.length() == 0) {
+                t247_string = data;
+              } else {
+                t247_string += " " + data;
+              }
+              break;
+          }
+        }
+      }
+      if (t247_string.length() > 0) {
+        result.add(t247_string);
+      }
+    }
+  }
+  
+  // 770 tag
+  List fields = record.getVariableFields("770");
+  Iterator fieldsIter = fields.iterator();
+  if (fields != null) {
+    while(fieldsIter.hasNext()) {
+      DataField t770 = (DataField) fieldsIter.next();
+      char ind1 = t770.getIndicator1();
+      char ind2 = t770.getIndicator2();
+      String t770_string = "";
+      if (ind1 == '0') {
+        if (ind2 == ' ') {
+          t770_string = "Has supplement:";
+        }
+        List subfields = t770.getSubfields();
+        Iterator i = subfields.iterator();
+        while (i.hasNext()) {
+          Subfield sf = (Subfield) i.next();
+          char code = sf.getCode();
+          String data = sf.getData();
+          switch(code) {
+            case 'a':
+            case 'b':
+            case 'd':
+            case 'g':
+            case 's':
+            case 't':
+              if (t770_string.length() == 0) {
+                t770_string = data;
+              } else {
+                t770_string += " " + data;
+              }
+              break;
+          }
+        }
+      }
+      if (t770_string.length() > 0) {
+        result.add(t770_string);
+      }
+    }
+  }
+  
+  // 772 tag
+  List fields = record.getVariableFields("772");
+  Iterator fieldsIter = fields.iterator();
+  if (fields != null) {
+    while(fieldsIter.hasNext()) {
+      DataField t772 = (DataField) fieldsIter.next();
+      char ind1 = t772.getIndicator1();
+      char ind2 = t772.getIndicator2();
+      String t772_string = "";
+      if (ind1 == '0') {
+        if (ind2 == ' ') {
+          t772_string = "Supplement to:";
+        } else if (ind2 == '0') {
+          t772_string = "Parent:";
+        }
+        List subfields = t772.getSubfields();
+        Iterator i = subfields.iterator();
+        while (i.hasNext()) {
+          Subfield sf = (Subfield) i.next();
+          char code = sf.getCode();
+          String data = sf.getData();
+          switch(code) {
+            case 'a':
+            case 'b':
+            case 'd':
+            case 'g':
+            case 's':
+            case 't':
+              if (t772_string.length() == 0) {
+                t772_string = data;
+              } else {
+                t772_string += " " + data;
+              }
+              break;
+          }
+        }
+      }
+      if (t772_string.length() > 0) {
+        result.add(t772_string);
+      }
+    }
+  }
+  
+  // 773 tag
+  List fields = record.getVariableFields("773");
+  Iterator fieldsIter = fields.iterator();
+  if (fields != null) {
+    while(fieldsIter.hasNext()) {
+      DataField t773 = (DataField) fieldsIter.next();
+      char ind1 = t773.getIndicator1();
+      char ind2 = t773.getIndicator2();
+      String t773_string = "";
+      if (ind1 == '0') {
+        if (ind2 == ' ') {
+          t773_string = "In:";
+        }
+        List subfields = t773.getSubfields();
+        Iterator i = subfields.iterator();
+        while (i.hasNext()) {
+          Subfield sf = (Subfield) i.next();
+          char code = sf.getCode();
+          String data = sf.getData();
+          switch(code) {
+            case 'a':
+            case 'b':
+            case 'd':
+            case 'g':
+            case 's':
+            case 't':
+              if (t773_string.length() == 0) {
+                t773_string = data;
+              } else {
+                t773_string += " " + data;
+              }
+              break;
+          }
+        }
+      }
+      if (t773_string.length() > 0) {
+        result.add(t773_string);
+      }
+    }
+  }
+  
+  // 780 tag
+  List fields = record.getVariableFields("780");
+  Iterator fieldsIter = fields.iterator();
+  if (fields != null) {
+    while(fieldsIter.hasNext()) {
+      DataField t780 = (DataField) fieldsIter.next();
+      char ind1 = t780.getIndicator1();
+      char ind2 = t780.getIndicator2();
+      String t780_string = "";
+      if (ind1 == '0') {
+        if (ind2 == '0') {
+          t780_string = "Continues:";
+        } else if (ind2 == '1') {
+          t780_string = "Continues in part:";
+        } else if (ind2 == '2') {
+          t780_string = "Supercedes:";
+        } else if (ind2 == '3') {
+          t780_string = "Supercedes in part:";
+        } else if (ind2 == '5') {
+          t780_string = "Absorbed:";
+        } else if (ind2 == '6') {
+          t780_string = "Absorbed in part:";
+        } else if (ind2 == '7') {
+          t780_string = "Separated from:";
+        }
+        List subfields = t780.getSubfields();
+        Iterator i = subfields.iterator();
+        while (i.hasNext()) {
+          Subfield sf = (Subfield) i.next();
+          char code = sf.getCode();
+          String data = sf.getData();
+          switch(code) {
+            case 'a':
+            case 'b':
+            case 'd':
+            case 'g':
+            case 's':
+            case 't':
+              if (t780_string.length() == 0) {
+                t780_string = data;
+              } else {
+                t780_string += " " + data;
+              }
+              break;
+          }
+        }
+      }
+      if (t780_string.length() > 0) {
+        result.add(t780_string);
+      }
+    }
+  }
+  
+  // 785 tag
+  List fields = record.getVariableFields("785");
+  Iterator fieldsIter = fields.iterator();
+  if (fields != null) {
+    while(fieldsIter.hasNext()) {
+      DataField t785 = (DataField) fieldsIter.next();
+      char ind1 = t785.getIndicator1();
+      char ind2 = t785.getIndicator2();
+      String t785_string = "";
+      if (ind1 == '0') {
+        if (ind2 == '0') {
+          t785_string = "Continued by:";
+        } else if (ind2 == '1') {
+          t785_string = "Continued in part by:";
+        } else if (ind2 == '2') {
+          t785_string = "Superceded by:";
+        } else if (ind2 == '3') {
+          t785_string = "Superceded in part by:";
+        } else if (ind2 == '4') {
+          t785_string = "Absorbed by:";
+        } else if (ind2 == '5') {
+          t785_string = "Absorbed in part by:";
+        } else if (ind2 == '8') {
+          t785_string = "Changed back to:";
+        }
+        List subfields = t785.getSubfields();
+        Iterator i = subfields.iterator();
+        while (i.hasNext()) {
+          Subfield sf = (Subfield) i.next();
+          char code = sf.getCode();
+          String data = sf.getData();
+          switch(code) {
+            case 'a':
+            case 'b':
+            case 'd':
+            case 'g':
+            case 's':
+            case 't':
+              if (t785_string.length() == 0) {
+                t785_string = data;
+              } else {
+                t785_string += " " + data;
+              }
+              break;
+          }
+        }
+      }
+      if (t785_string.length() > 0) {
+        result.add(t785_string);
+      }
+    }
+  }
+  
+  return result;
+}
+// end of Related title display
+
+// LC Call number facet
+public Set getHCLLCClassAlpha(Record record) {
+  Set result = new LinkedHashSet();
+  // first 050 tag
+  DataField field = (DataField) record.getVariableField("050");
+  if (field != null) {
+    Subfield sfa = field.getSubfield('a');
+    if (sfa != null) {
+      String t050a = sfa.getData();
+      if (t050a.length() > 0) {
+        Pattern p = Pattern.compile("^([A-Z]{1,3})[0-9]{1,}.*");
+        Matcher m = p.matcher(t050a);
+        if (m.find()) {
+          String lc_alpha = m.group(1);
+          result.add(lc_alpha);
+        }
+      }
+    }
+  }
+  return result;
+}
+// end of LC Call number facet
+
+
+// SuDoc Number display
+//   only grab the last 086 if there are multiples
+public Set getHCLSuDocNumberDisplay(Record record) {
+  Set result = new LinkedHashSet();
+  List fields = record.getVariableFields("086");
+  if (fields != null) {
+    int n_tags = fields.size();
+    int idx = 0;
+    Iterator fieldsIter = fields.iterator();
+    while(fieldsIter.hasNext()) {
+      DataField field = (DataField) fieldsIter.next();
+      idx++;
+      if (idx == n_tags) {
+        Subfield sfa = field.getSubfield('a');
+        if (sfa != null) {
+          String t086a = sfa.getData();
+          if (t086a.length() > 0) {
+            result.add(t086a);
+          }
+        }
+      }
+    }
+  }
+  return result;
+}
+// end of SuDoc Number display
+
+
+// URL for the resouce (second indicator is blank, 0, or 1)
+// The Solr field gets overloaded with <linktext><tab><url> for easier
+// consumption by the application
+public Set getHCLResourceURLDisplay(Record record) {
+  Set result = new LinkedHashSet();
+  List fields = record.getVariableFields("856");
+  if (fields != null) {
+    Iterator fieldsIter = fields.iterator();
+    while(fieldsIter.hasNext()) {
+      DataField field = (DataField) fieldsIter.next();
+      char ind1 = field.getIndicator1();
+      char ind2 = field.getIndicator2();
+      if (ind1 == '4') {
+        if ((ind2 == ' ') || (ind2 == '0') || (ind2 == '1')) {
+          Subfield sfu = field.getSubfield('u');
+          if (sfu != null) {
+            String t856u = sfu.getData();
+            if (t856u != null) {
+              // there is a subfield u
+              Pattern p_sfu = Pattern.compile("^http", Pattern.CASE_INSENSITIVE);
+              Matcher m_sfu = p_sfu.matcher(t856u);
+              if (m_sfu.find()) {
+                // subfield u appears to be a URL
+                String linktext = "Electronic version";
+                Subfield sfy = field.getSubfield('y');
+                if (sfy != null) {
+                  String t856y = sfy.getData();
+                  if (t856y.length() > 0) {
+                    linktext = t856y;
+                  }
+                }
+                String linktext_plus_url = linktext.concat("\t");
+                linktext_plus_url = linktext_plus_url.concat(t856u);
+                Subfield sf3 = field.getSubfield('3');
+                if (sf3 != null) {
+                  // there is a sf3
+                  String t8563 = field.getSubfield('3').getData();
+                  if (t8563 != null) {
+                    // check to make sure it's not an excerpt
+                    Pattern p_sf3 = Pattern.compile("excerpt", Pattern.CASE_INSENSITIVE);
+                    Matcher m_sf3 = p_sf3.matcher(t8563);
+                    if (!m_sf3.find()) {
+                      // not an exerpt
+                      result.add(linktext_plus_url);
+                    }
+                  } else {
+                    // no data is sf3?  add the sfu
+                    result.add(linktext_plus_url);
+                  }
+                } else {
+                  // no sf3, add the sfu
+                  result.add(linktext_plus_url);
+                }
+              } 
+            }
+          }
+        }
+      }
+    }
+  }
+  return result;
+}
+// end of URL for the resource
+
+// URL for a related resouce (second indicator is 2)
+// field overloaded with <linktext><tab><url>
+public Set getHCLRelatedURLDisplay(Record record) {
+  Set result = new LinkedHashSet();
+  List fields = record.getVariableFields("856");
+  if (fields != null) {
+    Iterator fieldsIter = fields.iterator();
+    while(fieldsIter.hasNext()) {
+      DataField field = (DataField) fieldsIter.next();
+      char ind1 = field.getIndicator1();
+      char ind2 = field.getIndicator2();
+      if (ind1 == '4') {
+        if (ind2 == '2') {
+          Subfield sfu = field.getSubfield('u');
+          if (sfu != null) {
+            String t856u = sfu.getData();
+            if (t856u != null) {
+              // there is a subfield u
+              Pattern p_sfu = Pattern.compile("^http", Pattern.CASE_INSENSITIVE);
+              Matcher m_sfu = p_sfu.matcher(t856u);
+              if (m_sfu.find()) {
+                // subfield u appears to be a URL
+                Subfield sfy = field.getSubfield('y');
+                if (sfy != null) {
+                  String t856y = sfy.getData();
+                  if (t856y.length() > 0) {
+                    // there's a subfield y
+                    String t856y = sfy.getData();
+                    String linktext_plus_url = t856y.concat("\t");
+                    linktext_plus_url = linktext_plus_url.concat(t856u);
+                    result.add(linktext_plus_url);
+                  }
+                }
+              } 
+            }
+          }
+        }
+      }
+    }
+  }
+  return result;
+}
+// end of URL for a related resource
+
+// URL for an excerpt
+public Set getHCLExcerptURLDisplay(Record record) {
+  Set result = new LinkedHashSet();
+  List fields = record.getVariableFields("856");
+  if (fields != null) {
+    Iterator fieldsIter = fields.iterator();
+    while(fieldsIter.hasNext()) {
+      DataField field = (DataField) fieldsIter.next();
+      char ind1 = field.getIndicator1();
+      char ind2 = field.getIndicator2();
+      if (ind1 == '4') {
+        if ((ind2 == ' ') || (ind2 == '0') || (ind2 == '1')) {
+          Subfield sfu = field.getSubfield('u');
+          if (sfu != null) {
+            String t856u = sfu.getData();
+            if (t856u != null) {
+              // there is a subfield u
+              Pattern p_sfu = Pattern.compile("^http", Pattern.CASE_INSENSITIVE);
+              Matcher m_sfu = p_sfu.matcher(t856u);
+              if (m_sfu.find()) {
+                // subfield u appears to be a URL
+                Subfield sf3 = field.getSubfield('3');
+                if (sf3 != null) {
+                  // there is a sf3
+                  String t8563 = field.getSubfield('3').getData();
+                  if (t8563 != null) {
+                    // check to make sure it's not an excerpt
+                    Pattern p_sf3 = Pattern.compile("excerpt", Pattern.CASE_INSENSITIVE);
+                    Matcher m_sf3 = p_sf3.matcher(t8563);
+                    if (m_sf3.find()) {
+                      // it's an exerpt
+                      result.add(t856u);
+                    }
+                  }
+                }
+              } 
+            }
+          }
+        }
+      }
+    }
+  }
+  return result;
+}
+// end of URL for an excerpt
+
+// UPC display
+//   support for being selective based on indicator
+public Set getHCLUPCDisplay(Record record){
+  Set result = new LinkedHashSet();
+  
+  List fields = record.getVariableFields("024");
+  Iterator fieldsIter = fields.iterator();
+  if (fields != null) {
+    while(fieldsIter.hasNext()) {
+      DataField t024 = (DataField) fieldsIter.next();
+      char ind1 = t024.getIndicator1();
+      if (ind1 == '1') {
+        Subfield sfa = t024.getSubfield('a');
+        if (sfa != null) {
+          String t024a = sfa.getData();
+          Pattern p = Pattern.compile("^([0-9]{10,}).*");
+          Matcher m = p.matcher(t024a);
+          if (m.find()) {
+            String upc = m.group(1);
+            result.add(upc);
+          }
+        }
+      }
+    }
+  }
+  
+  return result;
+}
+// end of UPC display
+
+// Series statement display
+//   generates series statement display
+//   supports having the same series (minus the series number) on a single record
+//   relies on ColdFusion to strip off the numeration with the prefix of "$v"
+public Set getHCLSeriesDisplay(Record record){
+  Set result = new LinkedHashSet();
+  
+  // 440 tag
+  List fields = record.getVariableFields("440");
+  Iterator fieldsIter = fields.iterator();
+  if (fields != null) {
+    while(fieldsIter.hasNext()) {
+      DataField t440 = (DataField) fieldsIter.next();
+      String t440_string = "";
+      List subfields = t440.getSubfields();
+      Iterator i = subfields.iterator();
+      while (i.hasNext()) {
+        Subfield sf = (Subfield) i.next();
+        char code = sf.getCode();
+        String data = sf.getData();
+        switch(code) {
+          case 'a':
+          case 'n':
+          case 'p':
+            if (t440_string.length() == 0) {
+              t440_string = data;
+            } else {
+              t440_string += " " + data;
+            }
+            break;
+          case 'v':
+            // this is intentional - it allows for "duplicate" series entries in the record
+            // (same series, different series number).  the $v is stripped off in UDF createSolrRecordStruct()
+            t440_string += " " + "$v" + data;
+            break;
+        }
+      }
+      if (t440_string.length() > 0) {
+        // remove trailing period
+        t440_string = t440_string.replaceFirst("\\.$", "");
+      }
+      if (t440_string.length() > 0) {
+        result.add(t440_string);
+      }
+    }
+  }
+  
+  // 800 tag
+  List fields = record.getVariableFields("800");
+  Iterator fieldsIter = fields.iterator();
+  if (fields != null) {
+    while(fieldsIter.hasNext()) {
+      DataField t800 = (DataField) fieldsIter.next();
+      String t800_string = "";
+      List subfields = t800.getSubfields();
+      Iterator i = subfields.iterator();
+      while (i.hasNext()) {
+        Subfield sf = (Subfield) i.next();
+        char code = sf.getCode();
+        String data = sf.getData();
+        switch(code) {
+          case 'a':
+          case 'b':
+          case 'c':
+          case 'd':
+          case 'f':
+          case 'k':
+          case 'l':
+          case 'm':
+          case 'n':
+          case 'o':
+          case 'p':
+          case 'q':
+          case 'r':
+          case 's':
+          case 't':
+            if (t800_string.length() == 0) {
+              t800_string = data;
+            } else {
+              t800_string += " " + data;
+            }
+            break;
+          case 'v':
+            // this is intentional - it allows for "duplicate" series entries in the record
+            // (same series, different series number).  the $v is stripped off in UDF createSolrRecordStruct()
+            t800_string += " " + "$v" + data;
+            break;
+        }
+      }
+      if (t800_string.length() > 0) {
+        // remove trailing period
+        t800_string = t800_string.replaceFirst("\\.$", "");
+      }
+      if (t800_string.length() > 0) {
+        result.add(t800_string);
+      }
+    }
+  }
+  
+  // 810 tag
+  List fields = record.getVariableFields("810");
+  Iterator fieldsIter = fields.iterator();
+  if (fields != null) {
+    while(fieldsIter.hasNext()) {
+      DataField t810 = (DataField) fieldsIter.next();
+      String t810_string = "";
+      List subfields = t810.getSubfields();
+      Iterator i = subfields.iterator();
+      while (i.hasNext()) {
+        Subfield sf = (Subfield) i.next();
+        char code = sf.getCode();
+        String data = sf.getData();
+        switch(code) {
+          case 'a':
+          case 'b':
+          case 'c':
+          case 'd':
+          case 'f':
+          case 'k':
+          case 'l':
+          case 'm':
+          case 'n':
+          case 'o':
+          case 'p':
+          case 'r':
+          case 's':
+          case 't':
+          if (t810_string.length() == 0) {
+            t810_string = data;
+          } else {
+            t810_string += " " + data;
+          }
+          break;
+          case 'v':
+            // this is intentional - it allows for "duplicate" series entries in the record
+            // (same series, different series number).  the $v is stripped off in UDF createSolrRecordStruct()
+            t810_string += " " + "$v" + data;
+            break;
+        }
+      }
+      if (t810_string.length() > 0) {
+        // remove trailing period
+        t810_string = t810_string.replaceFirst("\\.$", "");
+      }
+      if (t810_string.length() > 0) {
+        result.add(t810_string);
+      }
+    }
+  }
+  
+  // 811 tag
+  List fields = record.getVariableFields("811");
+  Iterator fieldsIter = fields.iterator();
+  if (fields != null) {
+    while(fieldsIter.hasNext()) {
+      DataField t811 = (DataField) fieldsIter.next();
+      String t811_string = "";
+      List subfields = t811.getSubfields();
+      Iterator i = subfields.iterator();
+      while (i.hasNext()) {
+        Subfield sf = (Subfield) i.next();
+        char code = sf.getCode();
+        String data = sf.getData();
+        switch(code) {
+          case 'a':
+          case 'c':
+          case 'd':
+          case 'e':
+          case 'f':
+          case 'k':
+          case 'l':
+          case 'n':
+          case 'p':
+          case 'q':
+          case 's':
+          case 't':
+          if (t811_string.length() == 0) {
+            t811_string = data;
+          } else {
+            t811_string += " " + data;
+          }
+          break;
+          case 'v':
+            // this is intentional - it allows for "duplicate" series entries in the record
+            // (same series, different series number).  the $v is stripped off in UDF createSolrRecordStruct()
+            t811_string += " " + "$v" + data;
+            break;
+        }
+      }
+      if (t811_string.length() > 0) {
+        // remove trailing period
+        t811_string = t811_string.replaceFirst("\\.$", "");
+      }
+      if (t811_string.length() > 0) {
+        result.add(t811_string);
+      }
+    }
+  }
+  
+  // 830 tag
+  List fields = record.getVariableFields("830");
+  Iterator fieldsIter = fields.iterator();
+  if (fields != null) {
+    while(fieldsIter.hasNext()) {
+      DataField t830 = (DataField) fieldsIter.next();
+      String t830_string = "";
+      List subfields = t830.getSubfields();
+      Iterator i = subfields.iterator();
+      while (i.hasNext()) {
+        Subfield sf = (Subfield) i.next();
+        char code = sf.getCode();
+        String data = sf.getData();
+        switch(code) {
+          case 'a':
+          case 'd':
+          case 'f':
+          case 'k':
+          case 'l':
+          case 'm':
+          case 'n':
+          case 'o':
+          case 'p':
+          case 'r':
+          case 's':
+          case 't':
+          if (t830_string.length() == 0) {
+            t830_string = data;
+          } else {
+            t830_string += " " + data;
+          }
+          break;
+          case 'v':
+            // this is intentional - it allows for "duplicate" series entries in the record
+            // (same series, different series number).  the $v is stripped off in UDF createSolrRecordStruct()
+            t830_string += " " + "$v" + data;
+            break;
+        }
+      }
+      if (t830_string.length() > 0) {
+        // remove trailing period
+        t830_string = t830_string.replaceFirst("\\.$", "");
+      }
+      if (t830_string.length() > 0) {
+        result.add(t830_string);
+      }
+    }
+  }
+  
+  return result;
+ 
+}
+// end of Series statement display
+
+// Series heading plus title-only display
+//   generates series heading plus title-only display
+//   format is [full_series_heading]$t[series_title_only]
+//   relies on ColdFusion to split the string to extract the two parts
+public Set getHCLSeriesHeadingPlusTitleDisplay(Record record){
+  Set result = new LinkedHashSet();
+  
+  // 440 tag
+  List fields = record.getVariableFields("440");
+  Iterator fieldsIter = fields.iterator();
+  if (fields != null) {
+    while(fieldsIter.hasNext()) {
+      DataField t440 = (DataField) fieldsIter.next();
+      String t440_heading = "";
+      String t440_title = "";
+      List subfields = t440.getSubfields();
+      Iterator i = subfields.iterator();
+      while (i.hasNext()) {
+        Subfield sf = (Subfield) i.next();
+        char code = sf.getCode();
+        String data = sf.getData();
+        switch(code) {
+          // heading and title subfields
+          case 'a':
+          case 'n':
+          case 'p':
+            if (t440_heading.length() == 0) {
+              t440_heading = data;
+            } else {
+              t440_heading += " " + data;
+            }
+            if (t440_title.length() == 0) {
+              t440_title = data;
+            } else {
+              t440_title += " " + data;
+            }
+            break;
+          // title only subfields
+          case 'v':
+            if (t440_title.length() == 0) {
+              t440_title = data;
+            } else {
+              t440_title += " " + data;
+            }
+            break;
+        }
+      }
+      if (t440_heading.length() > 0) {
+        // remove trailing period
+        t440_heading = t440_heading.replaceFirst("\\.$", "");
+        t440_heading = t440_heading.replaceFirst(" ;$", "");
+        t440_heading = t440_heading.replaceFirst(";$", "");
+      }
+      if (t440_title.length() > 0) {
+        // remove trailing period
+        t440_title = t440_title.replaceFirst("\\.$", "");
+      }
+      if (t440_title.length() > 0) {
+        String shpt = t440_heading + "$t" + t440_title;
+        result.add(shpt);
+      }
+    }
+  }
+  
+  // 800 tag
+  List fields = record.getVariableFields("800");
+  Iterator fieldsIter = fields.iterator();
+  if (fields != null) {
+    while(fieldsIter.hasNext()) {
+      DataField t800 = (DataField) fieldsIter.next();
+      List subfields = t800.getSubfields();
+      String t800_heading = "";
+      String t800_title = "";
+      Iterator i = subfields.iterator();
+      while (i.hasNext()) {
+        Subfield sf = (Subfield) i.next();
+        char code = sf.getCode();
+        String data = sf.getData();
+        switch(code) {
+          // heading only subfields
+          case 'a':
+          case 'b':
+          case 'c':
+          case 'd':
+          case 'f':
+          case 'k':
+          case 'l':
+          case 'm':
+          case 'o':
+          case 'q':
+          case 'r':
+          case 's':
+            if (t800_heading.length() == 0) {
+              t800_heading = data;
+            } else {
+              t800_heading += " " + data;
+            }
+            break;
+          // heading and title subfields
+          case 't':
+          case 'n':
+          case 'p':
+            if (t800_heading.length() == 0) {
+              t800_heading = data;
+            } else {
+              t800_heading += " " + data;
+            }
+            if (t800_title.length() == 0) {
+              t800_title = data;
+            } else {
+              t800_title += " " + data;
+            }
+            break;
+          // title only subfields
+          case 'v':
+            if (t800_title.length() == 0) {
+              t800_title = data;
+            } else {
+              t800_title += " " + data;
+            }
+            break;
+        }
+      }
+      if (t800_heading.length() > 0) {
+        // remove trailing period
+        t800_heading = t800_heading.replaceFirst("\\.$", "");
+        t800_heading = t800_heading.replaceFirst(" ;$", "");
+        t800_heading = t800_heading.replaceFirst(";$", "");
+     }
+      if (t800_title.length() > 0) {
+        // remove trailing period
+        t800_title = t800_title.replaceFirst("\\.$", "");
+      }
+      if (t800_title.length() > 0) {
+        String shpt = t800_heading + "$t" + t800_title;
+        result.add(shpt);
+      }
+    }
+  }
+  
+  // 810 tag
+  List fields = record.getVariableFields("810");
+  Iterator fieldsIter = fields.iterator();
+  if (fields != null) {
+    while(fieldsIter.hasNext()) {
+      DataField t810 = (DataField) fieldsIter.next();
+      String t810_heading = "";
+      String t810_title = "";
+      List subfields = t810.getSubfields();
+      Iterator i = subfields.iterator();
+      while (i.hasNext()) {
+        Subfield sf = (Subfield) i.next();
+        char code = sf.getCode();
+        String data = sf.getData();
+        switch(code) {
+          // heading only subfields
+          case 'a':
+          case 'b':
+          case 'c':
+          case 'd':
+          case 'f':
+          case 'k':
+          case 'l':
+          case 'm':
+          case 'o':
+          case 'r':
+          case 's':
+            if (t810_heading.length() == 0) {
+              t810_heading = data;
+            } else {
+              t810_heading += " " + data;
+            }
+            break;
+          // heading and title subfields
+          case 't':
+          case 'n':
+          case 'p':
+            if (t810_heading.length() == 0) {
+              t810_heading = data;
+            } else {
+              t810_heading += " " + data;
+            }
+            if (t810_title.length() == 0) {
+              t810_title = data;
+            } else {
+              t810_title += " " + data;
+            }
+            break;
+          // title only subfields
+          case 'v':
+            if (t810_title.length() == 0) {
+              t810_title = data;
+            } else {
+              t810_title += " " + data;
+            }
+            break;
+        }
+      }
+      if (t810_heading.length() > 0) {
+        // remove trailing period
+        t810_heading = t810_heading.replaceFirst("\\.$", "");
+        t810_heading = t810_heading.replaceFirst(" ;$", "");
+        t810_heading = t810_heading.replaceFirst(";$", "");
+      }
+      if (t810_title.length() > 0) {
+        // remove trailing period
+        t810_title = t810_title.replaceFirst("\\.$", "");
+      }
+      if (t810_title.length() > 0) {
+        String shpt = t810_heading + "$t" + t810_title;
+        result.add(shpt);
+      }
+    }
+  }
+  
+  // 811 tag
+  List fields = record.getVariableFields("811");
+  Iterator fieldsIter = fields.iterator();
+  if (fields != null) {
+    while(fieldsIter.hasNext()) {
+      DataField t811 = (DataField) fieldsIter.next();
+      String t811_heading = "";
+      String t811_title = "";
+      List subfields = t811.getSubfields();
+      Iterator i = subfields.iterator();
+      while (i.hasNext()) {
+        Subfield sf = (Subfield) i.next();
+        char code = sf.getCode();
+        String data = sf.getData();
+        switch(code) {
+          // heading only subfields
+          case 'a':
+          case 'c':
+          case 'd':
+          case 'e':
+          case 'f':
+          case 'k':
+          case 'l':
+          case 'q':
+          case 's':
+            if (t811_heading.length() == 0) {
+              t811_heading = data;
+            } else {
+              t811_heading += " " + data;
+            }
+            break;
+          // heading and title subfields
+          case 't':
+          case 'n':
+          case 'p':
+            if (t811_heading.length() == 0) {
+              t811_heading = data;
+            } else {
+              t811_heading += " " + data;
+            }
+            if (t811_title.length() == 0) {
+              t811_title = data;
+            } else {
+              t811_title += " " + data;
+            }
+            break;
+          // title only subfields
+          case 'v':
+            if (t811_title.length() == 0) {
+              t811_title = data;
+            } else {
+              t811_title += " " + data;
+            }
+            break;
+        }
+      }
+      if (t811_heading.length() > 0) {
+        // remove trailing period
+        t811_heading = t811_heading.replaceFirst("\\.$", "");
+        t811_heading = t811_heading.replaceFirst(" ;$", "");
+        t811_heading = t811_heading.replaceFirst(";$", "");
+      }
+      if (t811_title.length() > 0) {
+        // remove trailing period
+        t811_title = t811_title.replaceFirst("\\.$", "");
+      }
+      if (t811_title.length() > 0) {
+        String shpt = t811_heading + "$t" + t811_title;
+        result.add(shpt);
+      }
+    }
+  }
+  
+  // 830 tag
+  List fields = record.getVariableFields("830");
+  Iterator fieldsIter = fields.iterator();
+  if (fields != null) {
+    while(fieldsIter.hasNext()) {
+      DataField t830 = (DataField) fieldsIter.next();
+      String t830_heading = "";
+      String t830_title = "";
+      List subfields = t830.getSubfields();
+      Iterator i = subfields.iterator();
+      while (i.hasNext()) {
+        Subfield sf = (Subfield) i.next();
+        char code = sf.getCode();
+        String data = sf.getData();
+        switch(code) {
+          // heading only subfields
+          case 'd':
+          case 'f':
+          case 'k':
+          case 'l':
+          case 'm':
+          case 'o':
+          case 'r':
+          case 's':
+          case 't':
+            if (t830_heading.length() == 0) {
+              t830_heading = data;
+            } else {
+              t830_heading += " " + data;
+            }
+            break;
+          // heading and title subfields
+          case 'a':
+          case 'n':
+          case 'p':
+            if (t830_heading.length() == 0) {
+              t830_heading = data;
+            } else {
+              t830_heading += " " + data;
+            }
+            if (t830_title.length() == 0) {
+              t830_title = data;
+            } else {
+              t830_title += " " + data;
+            }
+            break;
+          // title only subfields
+          case 'v':
+            if (t830_title.length() == 0) {
+              t830_title = data;
+            } else {
+              t830_title += " " + data;
+            }
+            break;
+        }
+      }
+      if (t830_heading.length() > 0) {
+        // remove trailing period
+        t830_heading = t830_heading.replaceFirst("\\.$", "");
+        t830_heading = t830_heading.replaceFirst(" ;$", "");
+        t830_heading = t830_heading.replaceFirst(";$", "");
+      }
+      if (t830_title.length() > 0) {
+        // remove trailing period
+        t830_title = t830_title.replaceFirst("\\.$", "");
+      }
+      if (t830_title.length() > 0) {
+        String shpt = t830_heading + "$t" + t830_title;
+        result.add(shpt);
+      }
+    }
+  }
+  
+  return result;
+ 
+}
+// end of Series heading plus title display
+
+// Predominant collection from MARC record
+// If there is item data, will be overwritten by indexfile.pl
+public String getHCLPredominantCollection(Record record) {
+  String result = null;
+
+  // Grab the necessary data from the leader, 008 and the first 007 to determine the format
+  String leader = record.getLeader().toString();
+  char ldr06 = leader.length() > 6 ? leader.charAt(6) : ' ';
+  char ldr07 = leader.length() > 7 ? leader.charAt(7) : ' ';
+    
+  char fixed23 = ' ';
+  char fixed29 = ' ';
+  char fixed22 = 'x';
+  char fixed33 = ' ';
+  char fixed28 = ' ';
+  char fixed21 = ' ';
+  char fixed30 = ' ';
+  ControlField fixed = (ControlField) record.getVariableField("008");
+  if (fixed != null) {
+    fixed23 = fixed.getData().length() > 23 ? fixed.getData().charAt(23) : ' ';
+    fixed29 = fixed.getData().length() > 29 ? fixed.getData().charAt(29) : ' ';
+    fixed28 = fixed.getData().length() > 28 ? fixed.getData().charAt(28) : ' ';
+    fixed22 = fixed.getData().length() > 22 ? fixed.getData().charAt(22) : 'x';
+    fixed33 = fixed.getData().length() > 33 ? fixed.getData().charAt(33) : ' ';
+    fixed21 = fixed.getData().length() > 21 ? fixed.getData().charAt(21) : ' ';
+    fixed30 = fixed.getData().length() > 30 ? fixed.getData().charAt(30) : ' ';
+  }
+    
+  char desc00 = ' ';
+  char desc01 = ' ';
+  char desc04 = ' ';
+  List fields = record.getVariableFields("007");
+  Iterator fieldsIter = fields.iterator();
+  if (fields != null) {
+    ControlField desc;
+    String descString;
+    while(fieldsIter.hasNext()) {
+      desc = (ControlField) fieldsIter.next();
+      descString = desc.getData();
+      desc00 = descString.length() > 0 ? descString.charAt(0) : ' ';
+      desc01 = descString.length() > 1 ? descString.charAt(1) : ' ';
+      desc04 = descString.length() > 4 ? descString.charAt(4) : ' ';
+      break;
+    }
+  }
+    
+  // get literary form from fixed33 for books or fixed30 for audiobooks
+  String lit_form_bk;
+  switch (fixed33) {
+    case '0':
+    case 'd':
+    case 'e':
+    case 'h':
+    case 'i':
+    case 'm':
+    case 'p':
+    case 's':
+      lit_form_bk = "Nonfiction";
+      break;
+    case '1':
+    case 'f':
+    case 'j':
+      lit_form_bk = "Fiction";
+      break;
+  }
+  String lit_form_abk;
+  switch (fixed30) {
+    case 'a':
+    case 'b':
+    case 'c':
+    case 'd':
+    case 'e':
+    case 'g':
+    case 'h':
+    case 'i':
+    case 'j':
+      lit_form_abk = "Nonfiction";
+      break;
+    case 'f':
+      lit_form_abk = "Fiction";
+      break;
+  }
+    
+  // get audience from fixed22
+  String audience;
+  switch (fixed22) {
+    case ' ':
+    case 'e':
+    case 'g':
+      audience = "Adult";
+      break;
+    case 'd':
+      audience = "Teen";
+      break;
+    case 'b':
+    case 'c':
+    case 'j':
+      audience = "Children\'s";
+      break;
+    case 'a':
+      audience = "Easy";
+      break;
+  }
+    
+  // Now discover the format
+  // first check the 960
+  String hcl_format_code;
+  DataField t960 = (DataField) record.getVariableField("960");
+  if (t960 != null) {
+    Subfield sfa = t960.getSubfield('a');
+    if (sfa != null) {
+      hcl_format_code = sfa.getData();
+      if (hcl_format_code != null) {
+        if (hcl_format_code.equals("ogr")) {
+          // Online Gov't Resource
+          result = "Online Government Resource";
+        } else if (hcl_format_code.equals("dlbk")) {
+          // eBook
+          result = audience != null ? audience + " " : "";
+          result += lit_form_bk != null ? lit_form_bk + " " : "";
+          result += "eBook";
+        } else if (hcl_format_code.equals("dlab")) {
+          // Audiobook Download
+          result = audience != null ? audience + " " : "";
+          result += lit_form_abk != null ? lit_form_abk + " " : "";
+          result += "Audiobook Download";
+        } else if (hcl_format_code.equals("dlv")) {
+          // Video Download
+          result = audience != null ? audience + " " : "";
+          result += "Video Download";
+        } else if (hcl_format_code.equals("dlm")) {
+          // Music Download
+          result = audience != null ? audience + " " : "";
+          result += "Music Download";
+        } else if (hcl_format_code.equals("ebook")) {
+          // Online Book
+          result = "Online Book";
+        } else if (hcl_format_code.equals("ejournal")) {
+          // eJournal
+          result = "eJournal";
+        } else if (hcl_format_code.equals("ill")) {
+          // ILL
+          result = "Interlibrary Loan";
+        }
+      }
+    }
+  }
+    
+  if (result == null) {
+    if (ldr06 == 'c') {
+      // Mixed media
+      result = audience != null ? audience + " " : "";
+      result += "Mixed Media";
+    } else if (((((ldr06 == 'a') && ((ldr07 == 'm') || (ldr07 == 's'))) || ((ldr06 == 'c') || (ldr06 == 'd'))) && ((fixed23 == 'a') || (fixed23 == 'b'))) || (((ldr06 == 'e') || (ldr06 == 'f')) && ((fixed29 == 'a') || (fixed29 == 'b')))) {
+      // Microform
+      result = "Microform";
+    } else if (ldr07 == 's') {
+      // continuation
+      if (fixed21 == 'n') {
+        // newspaper
+        result = "Newspaper";
+      } else if (fixed21 == 'p') {
+        // magazine
+        result = audience != null ? audience + " " : "";
+        result += "Magazine";
+      } else {
+        // default to book
+        result = audience != null ? audience + " " : "";
+        result += "Nonfiction Book";
+      }
+    } else if ((ldr06 == 'a') && (ldr07 == 'm')) {
+      // print monograph
+      if (fixed23 == 'd') {
+        // large print
+        result = audience != null ? audience + " " : "";
+        result += lit_form_bk != null ? lit_form_bk + " " : "";
+        result += "Large Print";
+      } else if (fixed23 == 'f') {
+        // braille
+        result = audience != null ? audience + " " : "";
+        result += lit_form_bk != null ? lit_form_bk + " " : "";
+        result += "Braille";
+      } else {
+        // default to book
+        result = audience != null ? audience + " " : "";
+        result += lit_form_bk != null ? lit_form_bk + " " : "";
+        result += "Book";
+      }      
+    } else if (ldr06 == 'i') {
+      // non-music sound recording
+      if (desc01 == 'd') {
+        // audiobook on cd
+        result = audience != null ? audience + " " : "";
+        result += lit_form_abk != null ? lit_form_abk + " " : "";
+        result += "Audiobook on CD";
+      } else if (desc01 == 's') {
+        // audiobook on tape
+        result = audience != null ? audience + " " : "";
+        result += lit_form_abk != null ? lit_form_abk + " " : "";
+        result += "Audiobook on Tape";
+      }
+    } else if (ldr06 == 'j') {
+      // music sound recording
+      if (desc01 == "d") {
+        // music on cd
+        result = audience != null ? audience + " " : "";
+        result += "Music on CD";
+      } else if (desc01 == "s") {
+        // music on tape
+        result = audience != null ? audience + " " : "";
+        result += "Music on Tape";
+      }
+    } else if (ldr06 == 'g') {
+        // video
+      if (desc04 == 'v') {
+        // DVD
+        result = audience != null ? audience + " " : "";
+        result += "DVD";
+      } else if (desc04 == 'b') {
+        // Videotape
+        result = audience != null ? audience + " " : "";
+        result += "Videotape";
+      }
+    } else if (ldr06 == 'e') {
+      result = "Map";
+    } else if (ldr06 == 'c') {
+      // printed music
+      result = "Printed Music";
+    } else if (ldr06 == 'm') {
+      // CD-ROM
+      result = "CD-ROM";
+    }
+  }
+  return result;
+}
+// end of predominant collection from MARC
+
+/*
+ * return normalized OCLC#, normalized ISBN, ISSN, UPC, Horizon Bib#, OverDriveID, and "real" item barcodes
+ * @param record
+ * @return Set of Strings
+ */
+ // Item barcodes added in indexfile.pl
+public Set getHCLNumbers (Record record) {
+  LinkedHashSet result = new LinkedHashSet();
+  
+  // OCLC number - normalized to remove alpha characters
+  String t001 = record.getControlNumber();
+  if (t001 != null) {
+    // add it as is (with prefix, etc)
+    Pattern p = Pattern.compile("^([a-zA-Z ]{0,4}[0-9]+).*");
+    Matcher m = p.matcher(t001);
+    if (m.find()) {
+      String oclc = m.group(1);
+      result.add(oclc);
+    }
+    // now add it without alpha prefix
+    p = Pattern.compile("^[a-zA-Z ]{0,4}([0-9]+).*");
+    m = p.matcher(t001);
+    if (m.find()) {
+      String oclc = m.group(1);
+      result.add(oclc);
+    }
+  }
+
+  // ISBN
+  List isbn_fields = record.getVariableFields("020");
+  Iterator isbn_fieldsIter = isbn_fields.iterator();
+  if (isbn_fields != null) {
+    while(isbn_fieldsIter.hasNext()) {
+      DataField t020 = (DataField) isbn_fieldsIter.next();
+      Subfield sfa = t020.getSubfield('a');
+      if (sfa != null) {
+        String t020a = sfa.getData();
+        // check for 13 digit pattern
+        Pattern p = Pattern.compile("^(978[0-9]{10})[ ]*.*");
+        Matcher m = p.matcher(t020a);
+        if (m.find()) {
+          // it's a 13 digit ISBN
+          String isbn13 = m.group(1);
+          result.add(isbn13);
+          String isbn10 = isbn13to10(isbn13);
+          result.add(isbn10);
+        } else {
+          // check for 10 digit pattern
+          p = Pattern.compile("^([0-9]{9}[0-9Xx]{1})[ ]*.*");
+          m = p.matcher(t020a);
+          if (m.find()) {
+            String isbn10 = m.group(1);
+            result.add(isbn10);
+            String isbn13 = isbn10to13(isbn10);
+            result.add(isbn13);
+          }
+        }
+      }
+    }
+  }
+  
+  // ISSN
+  List issn_fields = record.getVariableFields("022");
+  Iterator issn_fieldsIter = issn_fields.iterator();
+  if (issn_fields != null) {
+    while(issn_fieldsIter.hasNext()) {
+      DataField t022 = (DataField) issn_fieldsIter.next();
+      Subfield sfa = t022.getSubfield('a');
+      if (sfa != null) {
+        String t022a = sfa.getData();
+        Pattern p = Pattern.compile("^([0-9]{4}-[0-9Xx]{4})[ ]*.*");
+        Matcher m = p.matcher(t022a);
+        if (m.find()) {
+          String issn = m.group(1);
+          result.add(issn);
+        }
+      }
+    }
+  }
+  
+  // UPC
+  List upc_fields = record.getVariableFields("024");
+  Iterator upc_fieldsIter = upc_fields.iterator();
+  if (upc_fields != null) {
+    while(upc_fieldsIter.hasNext()) {
+      DataField t024 = (DataField) upc_fieldsIter.next();
+      char ind1 = t024.getIndicator1();
+      if (ind1 == '1') {
+        Subfield sfa = t024.getSubfield('a');
+        if (sfa != null) {
+          String t024a = sfa.getData();
+          Pattern p = Pattern.compile("^([0-9]{6,}).*");
+          Matcher m = p.matcher(t024a);
+          if (m.find()) {
+            String upc = m.group(1);
+            result.add(upc);
+          }
+        }
+      }
+    }
+  }
+  
+  // Horizon Bib#
+  DataField t999 = (DataField) record.getVariableField("999");
+  if (t999 != null) {
+    Subfield sfa = t999.getSubfield('a');
+    if (sfa != null) {
+      String bid = sfa.getData();
+      if (bid != null) {
+        result.add(bid);
+      }
+    }
+  }
+  
+  // OverDrive ID number
+  List url_fields = record.getVariableFields("856");
+  Iterator url_fieldsIter = url_fields.iterator();
+  if (url_fields != null) {
+    while(url_fieldsIter.hasNext()) {
+      DataField t856 = (DataField) url_fieldsIter.next();
+      Subfield sfu = t856.getSubfield('u');
+      if (sfu != null) {
+        String t856u = sfu.getData();
+        Pattern p = Pattern.compile("ID=([A-Z0-9]{8}-[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{12})");
+        Matcher m = p.matcher(t856u);
+        if (m.find()) {
+          String odid = m.group(1);
+          result.add(odid);
+        }
+      }
+    }
+  }
+  
+  return result;
+}
+// end getHCLNumbers
+
+// If there is item data, will be overwritten by indexfile.pl
+public String getHCLFormatCode(Record record){
+  String result = null;
+  // first check the 960
+  String hcl_format_code;
+  DataField t960 = (DataField) record.getVariableField("960");
+  if (t960 != null) {
+    Subfield sfa = t960.getSubfield('a');
+    if (sfa != null) {
+      hcl_format_code = sfa.getData();
+      if (hcl_format_code != null) {
+        if (hcl_format_code.equals("ogr")) {
+          result = "OGR";
+        } else if (hcl_format_code.equals("dlbk")) {
+          result = "DLBK";
+        } else if (hcl_format_code.equals("dlab")) {
+          result = "DLAB";
+        } else if (hcl_format_code.equals("dlv")) {
+          result = "DLV";
+        } else if (hcl_format_code.equals("dlm")) {
+          result = "DLM";
+        } else if (hcl_format_code.equals("ebook")) {
+          result = "EB";
+        } else if (hcl_format_code.equals("ejournal")) {
+          result = "EJ";
+        } else if (hcl_format_code.equals("ill")) {
+          result = "ILL";
+        }
+      }
+    }
+  }
+    
+  if (result == null) {
+      
+    // Nothing valid in the 960
+    // Grab the necessary data from the leader, 008 and the first 007
+    String leader = record.getLeader().toString();
+    char ldr06 = leader.charAt(6);
+    char ldr07 = leader.charAt(7);
+    
+    char fixed21 = ' ';
+    char fixed23 = ' ';
+    char fixed29 = ' ';
+    char fixed28 = ' ';
+    ControlField fixed = (ControlField) record.getVariableField("008");
+    if (fixed != null) {
+      fixed21 = fixed.getData().length() > 21 ? fixed.getData().charAt(21) : ' ';
+      fixed23 = fixed.getData().length() > 23 ? fixed.getData().charAt(23) : ' ';
+      fixed29 = fixed.getData().length() > 29 ? fixed.getData().charAt(29) : ' ';
+      fixed28 = fixed.getData().length() > 28 ? fixed.getData().charAt(28) : ' ';
+    }
+      
+    char desc00 = ' ';
+    char desc01 = ' ';
+    char desc04 = ' ';
+    List fields = record.getVariableFields("007");
+    Iterator fieldsIter = fields.iterator();
+    if (fields != null) {
+      ControlField desc;
+      String descString;
+      while(fieldsIter.hasNext()) {
+        desc = (ControlField) fieldsIter.next();
+        descString = desc.getData();
+        desc00 = descString.length() > 0 ? descString.charAt(0) : ' ';
+        desc01 = descString.length() > 1 ? descString.charAt(1) : ' ';
+        desc04 = descString.length() > 4 ? descString.charAt(4) : ' ';
+        break;
+      }
+    }
+      
+    if (ldr06 == 'c') {
+      // Mixed media
+      result = "MM";
+    } else if (((((ldr06 == 'a') && ((ldr07 == 'm') || (ldr07 == 's'))) || ((ldr06 == 'c') || (ldr06 == 'd'))) && ((fixed23 == 'a') || (fixed23 == 'b'))) || (((ldr06 == 'e') || (ldr06 == 'f')) && ((fixed29 == 'a') || (fixed29 == 'b')))) {
+      // Microform
+      result = "MF";
+    } else if (ldr07 == 's') {
+      // continuation
+      if (fixed21 == 'n') {
+        // newspaper
+        result = "NP";
+      } else if (fixed21 == 'p') {
+        // magazine
+        result = "MA";
+      } else {
+        // default to book
+        result = "BK";
+      }
+    } else if ((ldr06 == 'a') && (ldr07 == 'm')) {
+      // print monograph
+      if (fixed23 == 'd') {
+        // large print
+        result = "LP";
+      } else if (fixed23 == 'f') {
+        // braille
+        result = "BR";
+      } else {
+        // default to book
+        result = "BK";
+      }
+    } else if (ldr06 == 'i') {
+      // non-music sound recording
+      if (desc01 == 'd') {
+        // audiobook on cd
+        result = "CD";
+      } else if (desc01 == 's') {
+        // audiobook on tape
+        result = "AT";
+      } else {
+        // default to unknown
+        result = "QM";
+      }
+    } else if (ldr06 == 'j') {
+      // music sound recording
+      if (desc01 == 'd') {
+        // music on cd
+        result = "CDM";
+      } else if (desc01 == 's') {
+        // music on tape
+        result = "ATM";
+      } else {
+        // default to unknown
+        result = "QM";
+      }
+    } else if (ldr06 == 'g') {
+      // video
+      if (desc04 == 'v') {
+        // DVD
+        result = "DVD";
+      } else if (desc04 == 'b') {
+        // Videotape
+        result = "VHS";
+      } else {
+        // default to unknown
+        result = "QM";
+      }
+    } else if (ldr06 == 'e') {
+      // cartographic material
+      result = "MAP";
+    } else if (ldr06 == 'c') {
+      // notated music
+      result = "MU";
+    } else if (ldr06 == 'm') {
+      // CD-ROM
+      result = "CDR";
+    } else {
+      // default to unknown
+      result = "QM";
+    }
+  }
+  
+  return result;
+ 
+}
+// end of Format
+
+// If there is item data, will be overwritten by indexfile.pl
+public String getHCLAudienceFacet(Record record) {
+  String result = null;
+  
+  // Grab the necessary data from the leader, 008 and the first 007
+  String leader = record.getLeader().toString();
+  char ldr06 = leader.charAt(6);
+  char ldr07 = leader.charAt(7);
+    
+  char fixed23 = ' ';
+  char fixed29 = ' ';
+  char fixed22 = 'x';
+  ControlField fixed = (ControlField) record.getVariableField("008");
+  if (fixed != null) {
+    fixed23 = fixed.getData().length() > 23 ? fixed.getData().charAt(23) : ' ';
+    fixed29 = fixed.getData().length() > 29 ? fixed.getData().charAt(29) : ' ';
+    fixed22 = fixed.getData().length() > 22 ? fixed.getData().charAt(22) : 'x';
+  }
+    
+  String aud_from_fixed22 = null;
+  switch (fixed22) {
+    case 'e':
+    case 'g':
+    case ' ':
+      aud_from_fixed22 = "Adult";
+      break;
+    case 'd':
+      aud_from_fixed22 = "Teen";
+      break;
+    case 'b':
+    case 'c':
+    case 'j':
+      aud_from_fixed22 = "Children\'s";
+      break;
+    case 'a':
+      aud_from_fixed22 = "Easy";
+      break;
+  }
+    
+  // first check the 960
+  String hcl_format_code;
+  DataField t960 = (DataField) record.getVariableField("960");
+  if (t960 != null) {
+    Subfield sfa = t960.getSubfield('a');
+    if (sfa != null) {
+      hcl_format_code = sfa.getData();
+      if (hcl_format_code != null) {
+        if (hcl_format_code.equals("ogr")) {
+          result = "Adult";
+        } else if (hcl_format_code.equals("dlbk")) {
+          result = aud_from_fixed22;
+        } else if (hcl_format_code.equals("dlab")) {
+          result = aud_from_fixed22;
+        } else if (hcl_format_code.equals("dlv")) {
+          result = aud_from_fixed22;
+        } else if (hcl_format_code.equals("dlm")) {
+          result = aud_from_fixed22;
+        } else if (hcl_format_code.equals("ebook")) {
+          result = aud_from_fixed22;
+        }
+      }
+    }
+  }
+    
+  if (result == null) {
+    if (((((ldr06 == 'a') && ((ldr07 == 'm') || (ldr07 == 's'))) || ((ldr06 == 'c') || (ldr06 == 'd'))) && ((fixed23 == 'a') || (fixed23 == 'b'))) || (((ldr06 == 'e') || (ldr06 == 'f')) && ((fixed29 == 'a') || (fixed29 == 'b')))) {
+      result = "Adult"; // Microform
+    } else if ((ldr06 == 'a') && (ldr07 == 'm')) {
+      result = aud_from_fixed22; // print monograph
+    } else if (ldr06 == 'i') {
+      result = aud_from_fixed22; // non-music sound recording
+    } else if (ldr06 == 'j') {
+      result = aud_from_fixed22; // music sound recording
+    } else if (ldr06 == 'g') {
+      result = aud_from_fixed22; // video
+    } else if (ldr06 == 'c') {
+      result = aud_from_fixed22; // notated music
+    } else if (ldr06 == 'm') {
+      result = aud_from_fixed22; // CD-ROM
+    }
+  }
+  
+  return result;
+  
+}
+// end of Audience
+
+// If there is item data, will be overwritten by indexfile.pl
+public String getHCLLiteraryForm(Record record){
+  String result = null;
+
+  // Grab the necessary data from the leader, 008 and the first 007
+  String leader = record.getLeader().toString();
+  char ldr06 = leader.charAt(6);
+  char ldr07 = leader.charAt(7);
+    
+  char fixed23 = ' ';
+  char fixed29 = ' ';
+  char fixed30 = ' ';
+  char fixed33 = ' ';
+  ControlField fixed = (ControlField) record.getVariableField("008");
+  if (fixed != null) {
+    fixed23 = fixed.getData().length() > 23 ? fixed.getData().charAt(23) : ' ';
+    fixed29 = fixed.getData().length() > 29 ? fixed.getData().charAt(29) : ' ';
+    fixed30 = fixed.getData().length() > 30 ? fixed.getData().charAt(30) : ' ';
+    fixed33 = fixed.getData().length() > 33 ? fixed.getData().charAt(33) : ' ';
+  }
+    
+  // get literary form from fixed33 for books or fixed30 for audiobooks
+  String lit_form_bk = null;
+  switch (fixed33) {
+    case '0':
+    case 'd':
+    case 'e':
+    case 'h':
+    case 'i':
+    case 'm':
+    case 'p':
+    case 's':
+      lit_form_bk = "Nonfiction";
+      break;
+    case '1':
+    case 'f':
+    case 'j':
+      lit_form_bk = "Fiction";
+      break;
+  }
+  String lit_form_abk = null;
+  switch (fixed30) {
+    case 'a':
+    case 'b':
+    case 'c':
+    case 'd':
+    case 'e':
+    case 'g':
+    case 'h':
+    case 'i':
+    case 'j':
+      lit_form_abk = "Nonfiction";
+      break;
+    case 'f':
+      lit_form_abk = "Fiction";
+      break;
+  }
+    
+  // first check the 960
+  String hcl_format_code;
+  DataField t960 = (DataField) record.getVariableField("960");
+  if (t960 != null) {
+    Subfield sfa = t960.getSubfield('a');
+    if (sfa != null) {
+      hcl_format_code = sfa.getData();
+      if (hcl_format_code != null) {
+        if (hcl_format_code.equals("dlbk")) {
+          result = lit_form_bk;
+        } else if (hcl_format_code.equals("dlab")) {
+          result = lit_form_abk;
+        } else if (hcl_format_code.equals("ebook")) {
+          result = lit_form_bk;
+        }
+      }
+    }
+  }
+    
+  if (result == null) {
+    
+    if (((((ldr06 == 'a') && ((ldr07 == 'm') || (ldr07 == 's'))) || ((ldr06 == 'c') || (ldr06 == 'd'))) && ((fixed23 == 'a') || (fixed23 == 'b'))) || (((ldr06 == 'e') || (ldr06 == 'f')) && ((fixed29 == 'a') || (fixed29 == 'b')))) {
+      // Microform - sorry...I didn't want to figure out how to exclude microforms from the mongraphs below
+      result = null;
+    } else if ((ldr06 == 'a') && (ldr07 == 'm')) {
+      // monograph
+      result = lit_form_bk;
+    } else if (ldr06 == 'i') {
+      // non-music sound recording
+      result = lit_form_abk;
+    }
+      
+  }
+    
+  return result;
+}
+// end of Literary form
+
+
+
+public String getHCLPublicFlag(Record record) {
+  String result = "true";
+  return result;
+}
+
+
+/* Convert a 13 digit ISBN to 10
+   Assumes that a good looking (via regex) isbn13 is passed
+   There is no error checking, so if a bad looking isbn13 is passed there's no telling what will happen
+*/
+public static String isbn13to10(String isbn13) {
+  String s9;
+  int i, n, v, cs;
+  s9 = isbn13.substring(3, 12);
+  n = 0;
+  for (i = 0; i < s9.length(); i++) {
+    char c = s9.charAt(i);
+    v = Character.getNumericValue(c);
+    n += v * (i + 1);
+  }
+  cs = n % 11;
+  String isbn10;
+  if (cs == 10) {
+    isbn10 = s9 + "X";
+  } else {
+    isbn10 = s9 + cs;
+  }
+  return isbn10;
+}
+
+/* Convert a 10 digit ISBN to 13
+   Assumes that a good looking (via regex) isbn10 is passed
+   There is no error checking, so if a bad looking isbn10 is passed there's no telling what will happen
+*/
+public static String isbn10to13(String isbn10) {
+  String s12;
+  int i, n, v, cs;
+  s12 = "978" + isbn10.substring(0, 9);
+  n = 0;
+  for (i = 0; i < s12.length(); i++) {
+    char c = s12.charAt(i);
+    v = Character.getNumericValue(c);
+    if (i % 2 == 0) {
+      n += v;
+    } else {
+      n += 3*v;
+    }
+  }
+  cs = n % 10;
+  if (cs != 0) {
+    cs = 10 - cs;
+  }
+  String isbn13 = s12 + cs;
+  return isbn13;
+}
